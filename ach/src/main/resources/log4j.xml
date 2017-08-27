@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<!-- <log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/' debug="true"> -->
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+	<appender name="FILE" class="org.apache.log4j.RollingFileAppender">
+		<param name="File"	value="C:\\logs\\ach\\common\\ach.log" />
+		<param name="MaxBackupIndex" value="20" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- <param name="ConversionPattern"
+				value="[%d] [%-5p] [%M] [%F:%L] -> [%m]%n" /> -->
+    <param name="ConversionPattern" value="%d{yyyy-MM-dd hh:mm:a} [%-5p] [%M] [%F:%L] -> [%m]%n" />
+		</layout>
+	</appender>
+	
+	<appender name="MasterTask" class="org.apache.log4j.RollingFileAppender">
+		<param name="File"	value="C:\\logs\\ach\\MasterTask\\Master.log" />
+		<param name="MaxBackupIndex" value="20" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d] [%-5p] [%M] [%F:%L] -> [%m]%n" />
+		</layout>
+	</appender>
+	
+	<appender name="GiRecvTask" class="org.apache.log4j.RollingFileAppender">
+		<param name="File"	value="C:\\logs\\ach\\GiRecvTask\\GiRecvTask.log" />
+		<param name="MaxBackupIndex" value="20" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d] [%-5p] [%M] [%F:%L] -> [%m]%n" />
+		</layout>
+	</appender>
+	
+	<appender name="GiScrubTask" class="org.apache.log4j.RollingFileAppender">
+		<param name="File"	value="C:\\logs\\ach\\GiScrubTask\\GiScrubTask.log" />
+		<param name="MaxBackupIndex" value="20" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d] [%-5p] [%M] [%F:%L] -> [%m]%n" />
+		</layout>
+	</appender>
+	<appender name="GiSendTask" class="org.apache.log4j.RollingFileAppender">
+		<param name="File"	value="C:\\logs\\ach\\GiSendTask\\GiSendTask.log" />
+		<param name="MaxBackupIndex" value="20" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d] [%-5p] [%M] [%F:%L] -> [%m]%n" />
+		</layout>
+	</appender>
+	<appender name="GiSynchTask" class="org.apache.log4j.RollingFileAppender">
+		<param name="File"	value="C:\\logs\\ach\\GiSynchTask\\GiSynchTask.log" />
+		<param name="MaxBackupIndex" value="20" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d] [%-5p] [%M] [%F:%L] -> [%m]%n" />
+		</layout>
+	</appender>
+	<appender name="NPCIServcTask" class="org.apache.log4j.RollingFileAppender">
+		<param name="File"	value="C:\\logs\\ach\\NPCIServcTask\\NPCIServcTask.log" />
+		<param name="MaxBackupIndex" value="20" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d] [%-5p] [%M] [%F:%L] -> [%m]%n" />
+		</layout>
+	</appender>
+	
+	<logger name="MasterTask" additivity="false">
+	  <level value="DEBUG"/> 
+	  <appender-ref ref="MasterTask" />
+	</logger>
+	
+	<logger name="GiRecvTask" additivity="false">
+	  <level value="DEBUG"/> 
+	  <appender-ref ref="GiRecvTask" />
+	</logger>
+	<logger name="GiScrubTask" additivity="false">
+	  <level value="DEBUG"/> 
+	  <appender-ref ref="GiScrubTask" />
+	</logger>
+	<logger name="GiSendTask" additivity="false">
+	  <level value="DEBUG"/> 
+	  <appender-ref ref="GiSendTask" />
+	</logger>
+	<logger name="GiSynchTask" additivity="false">
+	  <level value="DEBUG"/> 
+	  <appender-ref ref="GiSynchTask" />
+	</logger>
+	<logger name="NPCIServcTask" additivity="false">
+	  <level value="DEBUG"/> 
+	  <appender-ref ref="NPCIServcTask" />
+	</logger>
+	
+	<logger name="com.citi" additivity="false">
+	  <level value="DEBUG"/> 
+	  <appender-ref ref="FILE" />
+	</logger>
+	<logger name="org.hibernate" additivity="false">
+	  <level value="INFO"/> 
+	  <appender-ref ref="FILE" /> 
+	</logger>
+	<logger name="org.hibernate.SQL" additivity="false">
+	  <level value="DEBUG"/> 
+	  <appender-ref ref="FILE" /> 
+	</logger>
+	<logger name="org.springframework.web" additivity="false">
+	  <level value="DEBUG"/> 
+	  <appender-ref ref="FILE" /> 
+	</logger>
+ 	<root>
+		<level value="ERROR" />
+		<appender-ref ref="FILE" />
+	</root>
+</log4j:configuration>
