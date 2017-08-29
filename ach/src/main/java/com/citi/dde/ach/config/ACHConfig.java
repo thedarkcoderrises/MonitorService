@@ -14,6 +14,7 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jms.annotation.EnableJms;
@@ -32,12 +34,12 @@ import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.citi.dde.ach.routeBuilder.CamelRouteBuilder;
 import com.citi.dde.common.monitor.IMonitorConfig;
 import com.citi.dde.common.util.DDEConstants;
-import com.citi.dde.common.util.Strategy;
 
 
 
@@ -56,7 +58,8 @@ public class ACHConfig implements ApplicationContextAware{
 	
 	private ApplicationContext context;
 	
-	
+	@Value("${dde.ach.maxThreadSize}")
+	private String maxPoolSize;
 	
 	@Bean(name="camelContext")
 	public CamelContext  defaultCamelContext( ConnectionFactory activeMQConnectionFactory ) {
@@ -122,11 +125,23 @@ public class ACHConfig implements ApplicationContextAware{
 		return dmdc;
 	}
 	
+	@Bean
+  	public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+  		return new PropertySourcesPlaceholderConfigurer();
+  	}
 	
 	@Bean
 	public ConcurrentTaskExecutor taskExecutor(){
-		 ExecutorService executor = Executors.newFixedThreadPool(Strategy.values().length-1);// Excluding MASTER Strategy, Hence (length-1)
+		 ExecutorService executor = Executors.newFixedThreadPool(Integer.parseInt(maxPoolSize));// Excluding MASTER Strategy, Hence (length-1)
 		return new ConcurrentTaskExecutor(executor);
+	}
+	
+	@Bean
+	public ThreadPoolTaskExecutor threadPoolTaskExecutor(){
+		ThreadPoolTaskExecutor tpte = new ThreadPoolTaskExecutor();
+		tpte.setMaxPoolSize(Integer.parseInt(maxPoolSize));
+		tpte.setCorePoolSize(Integer.parseInt(maxPoolSize));
+		return tpte;
 	}
 
 

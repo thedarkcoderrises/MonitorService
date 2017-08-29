@@ -3,19 +3,33 @@ package com.citi.dde.ach.task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
+import com.citi.dde.ach.task.impl.MasterTask;
 import com.citi.dde.common.exception.PauseException;
 import com.citi.dde.common.util.DDEConstants;
+import com.citi.dde.common.util.Strategy;
 
 public abstract class ITaskRun implements Runnable {
 	
-	private String strategy;
+	private Strategy strategy;
 	
 	@Autowired
 	Environment env;
 	
 	public boolean keepRunning(){
-//		System.out.println("KeepRunning :"+getStrategy()+" Current Thread :"+Thread.currentThread().getName());
+		MasterTask.getActiveTaskMap().put(getCurrentTheadName(), DDEConstants.ACTIVE);
 		return true;
+	}
+	
+	private String getCurrentTheadName() {
+		String threadName =Thread.currentThread().getName();
+		if(threadName.contains(this.strategy.getStrategy())){
+			return threadName;
+		}else{
+			String threadNo = threadName.split(DDEConstants.THREAD_DELIMETER)[1];
+			threadName = this.strategy.getStrategy()+DDEConstants.UNDERSCORE+threadNo;
+			Thread.currentThread().setName(threadName);
+		}
+		return threadName;
 	}
 	
 	public void pause() throws PauseException{
@@ -30,11 +44,11 @@ public abstract class ITaskRun implements Runnable {
 		}
 	}
 
-	public void setStrategy(String name) {
-		this.strategy = name.toUpperCase();
+	public void setStrategy(Strategy name) {
+		this.strategy = name;
 	}
 
-	public String getStrategy() {
+	public Strategy getStrategy() {
 		return strategy;
 	}
 	

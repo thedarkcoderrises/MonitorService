@@ -9,7 +9,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
+import com.citi.dde.ach.task.impl.MasterTask;
 import com.citi.dde.common.exception.CommonException;
+import com.citi.dde.common.exception.TaskException;
 import com.citi.dde.common.util.DDEConstants;
 
 @Aspect
@@ -38,6 +40,9 @@ public class LoggingAspect {
 	
 	private Logger getLogger(String taskName) {
 		Logger taskLog;
+		if(taskName == null || taskName.isEmpty()){
+			return log;
+		}
 		if(taskName.contains(DDEConstants.MASTER_TASK_CLASS)){
 			taskLog = Logger.getLogger(DDEConstants.MASTER_TASK_CLASS);
 		}else if(taskName.contains(DDEConstants.TASK1_CLASS)){
@@ -60,7 +65,8 @@ public class LoggingAspect {
 	public void errorInterceptor(Exception ex) {
 		Logger taskLog;
 		if(ex instanceof CommonException){
-			taskLog = getLogger(((CommonException)ex).getClassName());
+			String loggerName = ((CommonException)ex).getLogName().split(DDEConstants.UNDERSCORE)[0];
+			taskLog = getLogger(loggerName);
 		}else{
 			taskLog = log;
 		}
@@ -73,5 +79,35 @@ public class LoggingAspect {
 	    if (taskLog.isDebugEnabled()) {
 	    	taskLog.debug("Error Message Interceptor finished.");
 	    }
+	}
+	
+	public void debug(String info, String loggger){
+		log(info,getLogger(loggger),DDEConstants.DEBUG);
+	}
+	
+	public void info(String info, String loggger){
+		log(info,getLogger(loggger),DDEConstants.INFO);
+	}
+	
+	public void error(String info, String loggger){
+		log(info,getLogger(loggger),DDEConstants.ERROR);
+	}
+	
+	
+	private void log(String info, Logger logger, String logType) {
+		switch(logType){
+		case DDEConstants.DEBUG : logger.debug(info); break;
+		case DDEConstants.INFO : logger.info(info); break;
+		case DDEConstants.ERROR : logger.error(info); break;
+		default :logger.debug(info); break;
+		}
+	}
+
+	@AfterThrowing(pointcut = "execution(* com.citi.dde.ach.*.*.*(..))", throwing = "ex")
+	public void taskException(TaskException ex) {
+		if (MasterTask.getActiveTaskMap().get(ex.getLogName()) != null){
+			MasterTask.getActiveTaskMap().put(ex.getLogName(),DDEConstants.DEACTIVE);
+		}
+		errorInterceptor(ex);
 	}
 }

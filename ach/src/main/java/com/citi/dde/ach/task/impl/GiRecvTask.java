@@ -61,24 +61,20 @@ public class GiRecvTask extends ITaskRun implements ITaskDef<Integer>{
 
 	@Override
 	public void run() {
-		try {
 			process();
-		} catch (TaskException e) {
-			log.errorInterceptor(e);
-		}
 	}
 
 
 	@Override
-	public Integer process() throws TaskException {
+	public Integer process() {
 		try {
-			setStrategy(Strategy.MSG_RECV.name());
+			setStrategy(Strategy.MSG_RECV);
 			while(keepRunning()){
 				giRecvTaskService.executeTask();
 				pause();
 			}
-		} catch (Exception e) {
-			throw new TaskException(e.getMessage(),this.getClass().getName(),e);
+		} catch (TaskException | PauseException e  ) {
+			//do something
 		}
 	return 0;
 	}

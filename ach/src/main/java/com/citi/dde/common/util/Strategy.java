@@ -6,7 +6,12 @@ import java.util.LinkedList;
 
 public enum Strategy
 {
-  GI_SCRUB("GS"), MSG_SEND("MS"),  MSG_RECV("MR"), DATA_SYNC("DS"), NPCI_SVC("NS"), MASTER("ALL");
+  GI_SCRUB(DDEConstants.GI_SCRUB_TASK), 
+  MSG_SEND(DDEConstants.GI_SEND_TASK),
+  MSG_RECV(DDEConstants.GI_RECV_TASK), 
+  DATA_SYNC(DDEConstants.GI_SYNCH_TASK), 
+  NPCI_SVC(DDEConstants.NPCI_SVC_TASK), 
+  MASTER("ALL");
   
   private String strategy;
   

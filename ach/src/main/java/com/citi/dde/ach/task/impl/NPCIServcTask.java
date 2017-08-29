@@ -64,7 +64,7 @@ public class NPCIServcTask extends ITaskRun implements ITaskDef<Integer>{
 	@Override
 	public Integer process() throws TaskException {
 		try {
-			setStrategy(Strategy.NPCI_SVC.name());
+			setStrategy(Strategy.NPCI_SVC);
 			while(keepRunning()){
 				System.out.println("NPCIServcTask..");
 				pause();

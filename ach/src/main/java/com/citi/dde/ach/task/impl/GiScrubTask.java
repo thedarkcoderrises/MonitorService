@@ -69,7 +69,7 @@ public class GiScrubTask extends ITaskRun implements ITaskDef<Integer>{
 	@Override
 	public Integer process() throws TaskException {
 		try {
-			setStrategy(Strategy.GI_SCRUB.name());
+			setStrategy(Strategy.GI_SCRUB);
 			while(keepRunning()){
 				giScrubTaskService.executeTask();
 				pause();

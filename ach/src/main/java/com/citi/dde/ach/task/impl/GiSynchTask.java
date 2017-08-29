@@ -66,7 +66,7 @@ public class GiSynchTask extends ITaskRun implements ITaskDef<Integer>{
 	@Override
 	public Integer process() throws TaskException {
 		try {
-			setStrategy(Strategy.DATA_SYNC.name());
+			setStrategy(Strategy.DATA_SYNC);
 			while(keepRunning()){
 				System.out.println("GiSynchTask..");
 				pause();

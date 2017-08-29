@@ -146,7 +146,7 @@ public class MQMonitor extends AbstractMonitor  {
 		for(Strategy app : apps) {
 			ITaskDef<?> task = context.getBean(app.name(), ITaskDef.class);
 			allTasks.add(task);
-			if(DDEConstants.MASTER_TASK.equalsIgnoreCase( app.name())){
+			if(DDEConstants.MASTER.equalsIgnoreCase( app.name())){
 				this.masterTask=true;
 			}
 				logger.info("Executing Task ----->>"+app.name().toUpperCase());

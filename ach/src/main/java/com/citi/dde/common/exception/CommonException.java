@@ -11,7 +11,7 @@ public abstract class CommonException extends Exception {
 	 */
 	private static final long serialVersionUID = -8939736293243175331L;
 	
-	private String className;
+	private String logName;
 
 	public CommonException(String message, Throwable cause) {
 		super(message, cause);
@@ -36,25 +36,25 @@ public abstract class CommonException extends Exception {
 	public CommonException(String message, String clazzName) {
 		super(message);
 		if(!StringUtils.isEmpty(clazzName)){
-			setClassName(clazzName);
+			setLogName(clazzName);
 		}
 	}
 
 	public CommonException(String message, String clazzName, Exception e) {
 		super(message,e);
 		if(!StringUtils.isEmpty(clazzName)){
-			setClassName(clazzName);
+			setLogName(clazzName);
 		}else{
-			setClassName(DDEConstants.EMPTY_STRING);
+			setLogName(DDEConstants.EMPTY_STRING);
 		}
 	}
 
-	public String getClassName() {
-		return className;
+	public String getLogName() {
+		return logName;
 	}
 
-	public void setClassName(String className) {
-		this.className = className;
+	public void setLogName(String className) {
+		this.logName = className;
 	}
 
 	

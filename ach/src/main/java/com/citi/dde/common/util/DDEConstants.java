@@ -13,7 +13,7 @@ public interface DDEConstants {
 	String NPCI_SVC_PAUSE="NPCI_SVC.waittime";*/
 	String DEFAULT_PAUSE = "default.waittime";
 	String WAIT_TIME=".waittime";
-	String MASTER_TASK = "MASTER"; 
+	String MASTER = "MASTER"; 
 	String TASK1_CLASS="GiRecvTask";
 	String TASK2_CLASS="GiScrubTask";
 	String TASK3_CLASS="GiSynchTask";
@@ -23,4 +23,18 @@ public interface DDEConstants {
 	String BEFORE_LOG = "IN :";
 	String AFTER_LOG = "OUT :";
 	String EMPTY_STRING = "";
+	String DEBUG = "D";
+	String ERROR = "E";
+	String INFO = "I";
+	String GI_RECV_TASK="GiRecvTask";
+	String GI_SEND_TASK="GiSendTask";
+	String GI_SCRUB_TASK="GiScrubTask";
+	String GI_SYNCH_TASK="GiSynchTask";
+	String NPCI_SVC_TASK="NPCIServcTask";
+	String MASTER_TASK="MasterTask";
+	String ACTIVE = "Y";
+	String DEACTIVE = "N";
+	String UNDERSCORE = "_";
+	String THREAD_DELIMETER = "-thread-";
+	String THREAD_SIZE=".thread.size";
 }

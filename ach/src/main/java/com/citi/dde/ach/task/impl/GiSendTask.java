@@ -65,7 +65,7 @@ public class GiSendTask extends ITaskRun implements ITaskDef<Integer>{
 	public Integer process() throws TaskException {
 
 		try {
-			setStrategy(Strategy.MSG_SEND.name());
+			setStrategy(Strategy.MSG_SEND);
 			while(keepRunning()){
 				System.out.println("GiSendTask..");
 				pause();
