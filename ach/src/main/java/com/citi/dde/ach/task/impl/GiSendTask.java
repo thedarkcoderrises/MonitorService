@@ -3,6 +3,7 @@ package com.citi.dde.ach.task.impl;
 import java.io.FileNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import com.citi.dde.common.util.DDEConstants;
 import com.citi.dde.common.util.Strategy;
 
 @Component("MSG_SEND")
+@Scope("prototype")
 public class GiSendTask extends ITaskRun implements ITaskDef<Integer>{
 
 	@Autowired
