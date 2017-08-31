@@ -12,6 +12,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.common.aop.LoggingAspect;
@@ -49,7 +50,7 @@ public class MasterTask implements ITaskDef<Integer>{
 			Strategy[] startergies = Strategy.MASTER.getAllStratergies();
 			for (Strategy strategy : startergies) {
 				if(!Strategy.MASTER.name().equalsIgnoreCase(strategy.name())){//Exclude MASTER Strategy
-					int size = Integer.parseInt(env.getProperty(strategy.getStrategy()+DDEConstants.THREAD_SIZE));
+					int size = getThreadSize(strategy);
 						for(int i=0;i<size;i++){
 							Runnable task = context.getBean(strategy.name(), Runnable.class);
 							taskExecutor.submit(task);
@@ -61,6 +62,21 @@ public class MasterTask implements ITaskDef<Integer>{
 			throw new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e);
 		}
 		return 0;
+	}
+
+	private int getThreadSize(Strategy strategy) {
+		String count = env.getProperty(strategy.getStrategy()+DDEConstants.THREAD_SIZE);
+		int cnt =0;
+		if(!StringUtils.isEmpty(count)){
+			try{
+				cnt= Integer.parseInt(count);	
+			}catch(NumberFormatException e){
+				cnt =DDEConstants.DEFAULT_THREAD_COUNT;
+			}finally{
+				log.info(strategy.getStrategy()+" Thread Count : "+cnt, DDEConstants.MASTER_TASK);
+			}
+		}
+		return cnt;
 	}
 
 	private void monitorAllThread() throws TaskException {

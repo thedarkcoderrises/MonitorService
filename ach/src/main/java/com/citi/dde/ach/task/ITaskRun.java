@@ -16,9 +16,7 @@ public abstract class ITaskRun implements Runnable {
 	Environment env;
 	
 	public boolean keepRunning(){
-		synchronized (this) {
 			MasterTask.getActiveTaskMap().put(getCurrentTheadName(), DDEConstants.ACTIVE);
-		}
 		System.out.println(Thread.currentThread().getName()+"...");
 		return true;
 	}

@@ -40,4 +40,6 @@ public interface DDEConstants {
 	String THREAD_SIZE=".thread.size";
 	String IS_RUNNING = "...";
 	String NOT_APPLICABLE = "NA";
+	Integer DEFAULT_THREAD_COUNT = 1;
+	Integer DEFAULT_THREAD_MAX_CORE_SIZE = 1;
 }
