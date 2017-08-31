@@ -1,6 +1,5 @@
 package com.citi.dde.ach.service.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +28,8 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 	}
 	@Override
 	public Integer executeTask() throws TaskException {
-		/*synchronized (this) {
+		synchronized (this) {
 			try{
-				System.out.println(Thread.currentThread().getName()+"..");
 				if(firstThread){
 					throw new NullPointerException();
 				}	
@@ -39,9 +37,9 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 				firstThread=false;
 				throw new TaskException(e.getMessage(), Thread.currentThread().getName(), e);
 			}
-		}*/
+		}
 		
-		processCommand();	
+//		processCommand();	
 		return 0;
 	}
 

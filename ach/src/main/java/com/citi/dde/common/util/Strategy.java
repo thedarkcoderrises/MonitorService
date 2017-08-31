@@ -2,7 +2,9 @@ package com.citi.dde.common.util;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 public enum Strategy
 {
@@ -15,12 +17,16 @@ public enum Strategy
   
   private String strategy;
   
+  private static Map<String,Strategy> strategyMap = new HashMap<>(values().length, 1);;
+  
   private Strategy(String strategyCode)
   {
     strategy = strategyCode;
   }
   
-
+  static {
+	    for (Strategy strategy : values()) strategyMap.put(strategy.getStrategy(), strategy);
+	  }
 
   public String getStrategy()
   {
@@ -35,7 +41,12 @@ public enum Strategy
 
 
 
-  public static Collection<Strategy> getStrategy(String strategyCode)
+  public static Strategy getStrategy(String strategyCode)
+  {
+	  return strategyMap.get(strategyCode);
+  }
+
+  public static Collection<Strategy> getStrategies(String strategyCode)
   {
     if (strategyCode == null) {
       return Arrays.asList(values());

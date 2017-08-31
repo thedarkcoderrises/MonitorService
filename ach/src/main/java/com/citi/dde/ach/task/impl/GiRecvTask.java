@@ -1,7 +1,5 @@
 package com.citi.dde.ach.task.impl;
 
-import java.io.FileNotFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
@@ -34,31 +32,9 @@ public class GiRecvTask extends ITaskRun implements ITaskDef<Integer>{
 	}
 
 	@Override
-	public void preInit() throws TaskException, FileNotFoundException {
-	}
-
-	@Override
 	public void init() throws TaskException {
 	}
 
-	@Override
-	public void preStart() throws TaskException {
-	}
-
-	@Override
-	public void start() throws TaskException {
-		
-	}
-
-	@Override
-	public Integer finish() throws TaskException {
-		return null;
-	}
-
-	@Override
-	public boolean isRunning() {
-		return false;
-	}
 
 	@Override
 	public void run() {
@@ -76,6 +52,7 @@ public class GiRecvTask extends ITaskRun implements ITaskDef<Integer>{
 			}
 		} catch (TaskException | PauseException e  ) {
 			//do something
+			log.info("Thread :"+Thread.currentThread().getName()+" stoped",Thread.currentThread().getName() );
 		}
 	return 0;
 	}

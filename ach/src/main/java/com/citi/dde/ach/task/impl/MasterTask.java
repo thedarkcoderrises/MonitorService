@@ -1,8 +1,8 @@
 package com.citi.dde.ach.task.impl;
 
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -11,9 +11,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.common.aop.LoggingAspect;
+import com.citi.dde.common.exception.PauseException;
 import com.citi.dde.common.exception.TaskException;
 import com.citi.dde.common.util.DDEConstants;
 import com.citi.dde.common.util.Strategy;
@@ -27,9 +29,6 @@ public class MasterTask implements ITaskDef<Integer>{
 	
 	@Autowired
 	LoggingAspect log;
-	
-//	@Autowired
-//	ThreadPoolTaskExecutor tpte;
 	
 	@Autowired
 	private ApplicationContext context;
@@ -48,38 +47,78 @@ public class MasterTask implements ITaskDef<Integer>{
 	private Integer executeAllTaskAsThread() throws TaskException {
 		try{
 			Strategy[] startergies = Strategy.MASTER.getAllStratergies();
-			int threadCount=0;
 			for (Strategy strategy : startergies) {
 				if(!Strategy.MASTER.name().equalsIgnoreCase(strategy.name())){//Exclude MASTER Strategy
 					int size = Integer.parseInt(env.getProperty(strategy.getStrategy()+DDEConstants.THREAD_SIZE));
 						for(int i=0;i<size;i++){
 							Runnable task = context.getBean(strategy.name(), Runnable.class);
 							taskExecutor.submit(task);
-							threadCount++;
 						}
 				}
-			}
-			if(activeThreads()==threadCount){
-				log.info("All Threads Spawned", DDEConstants.MASTER_TASK);
-			}else{
-				
 			}
 			
 		}catch(Exception e){
 			throw new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e);
 		}
-		return null;
+		return 0;
 	}
 
-	private int activeThreads() {
-		//TODO
-		return getActiveTaskMap().size();
-	}
-
-	@Override
-	public void preInit() throws TaskException, FileNotFoundException {
+	private void monitorAllThread() throws TaskException {
+		try{
+			while(true){
+				pause();
+				Map<String,Integer> failThreadMap = getFailThreads();
+				if(CollectionUtils.isEmpty(failThreadMap)){
+					log.info("All Threads Spawned", DDEConstants.MASTER_TASK);
+				}else{
+					executeFailTaskAsThread(failThreadMap);
+				}
+			}	
+		}catch(Exception e){
+			throw new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e);
+		}
 		
 	}
+
+	private void executeFailTaskAsThread(Map<String, Integer> failThreadMap) throws TaskException{
+		try{
+			for (String strategyCode : failThreadMap.keySet()) {
+				int size = failThreadMap.get(strategyCode);
+				for(int i=0;i<size;i++){
+					Runnable task = context.getBean(Strategy.getStrategy(strategyCode).name(), Runnable.class);
+					taskExecutor.submit(task);
+				}
+			}
+		}catch(Exception e){
+			throw new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e);
+		}	
+	}
+
+	private Map<String,Integer> getFailThreads() {
+		Set<String> activeThreadSet = getActiveTaskMap().keySet();
+		Map<String,Integer> failThreadMap = new HashMap<>();
+		int count =0;
+		for (String threadName : activeThreadSet) {
+			String isRunning = getActiveTaskMap().get(threadName);
+			if(DDEConstants.DEACTIVE.equals(isRunning)){
+				String strategyCode  = threadName.split(DDEConstants.UNDERSCORE)[0];
+				if(!failThreadMap.containsKey(strategyCode)){
+					failThreadMap.put(strategyCode, 1);
+				}else{
+					count = failThreadMap.get(strategyCode);
+					failThreadMap.put(strategyCode, ++count);
+				}
+				log.error("Thread execution fail: "+threadName, threadName);
+				log.error("Thread execution fail: "+threadName, DDEConstants.MASTER_TASK);
+				getActiveTaskMap().put(threadName, DDEConstants.NOT_APPLICABLE);
+			}else if(DDEConstants.ACTIVE.equals(isRunning)){
+				log.info("Thread: "+threadName+DDEConstants.IS_RUNNING, DDEConstants.MASTER_TASK);
+			}
+		}
+		
+		return failThreadMap;
+	}
+
 
 	@Override
 	@PostConstruct
@@ -87,33 +126,28 @@ public class MasterTask implements ITaskDef<Integer>{
 		this.activeTaskMap = new HashMap<String,String>();
 	}
 
-	@Override
-	public void preStart() throws TaskException {
-	}
-
-	@Override
-	public void start() throws TaskException {
-		
-	}
-
-	@Override
-	public Integer finish() throws TaskException {
-		return null;
-	}
-
-	@Override
-	public boolean isRunning() {
-		return false;
-	}
 
 	@Override
 	public Integer process() throws TaskException {
-		return executeAllTaskAsThread();
+		 executeAllTaskAsThread();
+		 monitorAllThread();
+		 return 0;
 	}
 
 	public static Map<String, String> getActiveTaskMap() {
 		return activeTaskMap;
 	}
 
+	public void pause() throws PauseException{
+		try {
+			Thread.sleep(Integer.parseInt(env.getProperty(DDEConstants.MASTER_PAUSE)));
+		} catch (InterruptedException | NumberFormatException e) {
+			try {
+				Thread.sleep(Integer.parseInt(env.getProperty(DDEConstants.DEFAULT_PAUSE),300000));
+			} catch (NumberFormatException | InterruptedException e1) {
+				throw new PauseException(e);
+			}
+		}
+	}
 
 }

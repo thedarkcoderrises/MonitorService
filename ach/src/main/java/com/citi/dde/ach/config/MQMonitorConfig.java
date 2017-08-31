@@ -15,7 +15,7 @@ public class MQMonitorConfig implements IMonitorConfig {
 
 	@Override
 	public Collection<Strategy> getStrategyType() {
-		return Strategy.getStrategy(System.getProperty("app"));
+		return Strategy.getStrategies(System.getProperty("app"));
 	}
 
 	@Override

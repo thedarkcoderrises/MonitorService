@@ -1,7 +1,5 @@
 package com.citi.dde.ach.task.impl;
 
-import java.io.FileNotFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
@@ -9,9 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.ach.task.ITaskRun;
-import com.citi.dde.common.exception.PauseException;
 import com.citi.dde.common.exception.TaskException;
-import com.citi.dde.common.util.DDEConstants;
 import com.citi.dde.common.util.Strategy;
 
 @Component("DATA_SYNC")
@@ -28,31 +24,9 @@ public class GiSynchTask extends ITaskRun implements ITaskDef<Integer>{
 	}
 
 	@Override
-	public void preInit() throws TaskException, FileNotFoundException {
-	}
-
-	@Override
 	public void init() throws TaskException {
 	}
 
-	@Override
-	public void preStart() throws TaskException {
-	}
-
-	@Override
-	public void start() throws TaskException {
-		
-	}
-
-	@Override
-	public Integer finish() throws TaskException {
-		return null;
-	}
-
-	@Override
-	public boolean isRunning() {
-		return false;
-	}
 
 	
 	@Override
@@ -70,7 +44,6 @@ public class GiSynchTask extends ITaskRun implements ITaskDef<Integer>{
 		try {
 			setStrategy(Strategy.DATA_SYNC);
 			while(keepRunning()){
-				System.out.println("GiSynchTask..");
 				pause();
 			}
 		} catch (Exception e) {
