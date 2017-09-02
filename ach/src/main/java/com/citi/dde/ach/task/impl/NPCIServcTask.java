@@ -46,7 +46,7 @@ public class NPCIServcTask extends ITaskRun implements ITaskDef<Integer>{
 				pause();
 			}
 		} catch (Exception e) {
-			throw new TaskException(e.getMessage());
+			throw new TaskException(e.getMessage(),ITaskRun.getThreadName(),e);
 		}
 	return 0;
 	}

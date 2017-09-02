@@ -13,8 +13,8 @@ public class GiScrubTaskServiceImpl implements GiScrubTaskService {
 	public Integer executeTask() throws TaskException {
 		try{
 			if(true){
-				Thread.sleep(4000);
-				throw new NullPointerException();
+//				Thread.sleep(4000);
+//				throw new NullPointerException();
 			}	
 		}catch(Exception e){
 			throw new TaskException(e.getMessage(), ITaskRun.getThreadName(), e);

@@ -28,4 +28,7 @@ public class MonitorException extends CommonException {
 		super(arg0);
 	}
 
+	public MonitorException(String message, String name, Exception e) {
+		super(message,name,e);
+	}
 }

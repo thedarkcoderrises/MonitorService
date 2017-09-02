@@ -14,7 +14,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.common.exception.MonitorException;
 import com.citi.dde.common.exception.PauseException;
 import com.citi.dde.common.util.DDEConstants;
@@ -27,12 +26,10 @@ import com.citi.dde.common.util.Strategy;
  * 
  */
 @Component("mq-monitor")
-public class MQMonitor extends AbstractMonitor  {
+public class MQMonitor implements IMonitorDef  {
 
 
-	private static boolean taskSuccess = false;
-	
-	private boolean masterTask = false;
+	private IMonitorConfig config;
 	
 	int SYSTEM_EXIT=0;
 
@@ -51,7 +48,7 @@ public class MQMonitor extends AbstractMonitor  {
 
 
 	public MQMonitor(IMonitorConfig config) {
-		super(config);		
+		this.config=config;
 	}
 
 	public void execute() throws MonitorException {
@@ -61,22 +58,7 @@ public class MQMonitor extends AbstractMonitor  {
 	}
 
 	public void init() throws MonitorException {
-		
-	}
-
-	public boolean keepRunning() throws MonitorException {
-		/*String path = env.getProperty(DDEConstants.PATH_CTL_FILES);
-		
-		if(path == null) {
-			throw new CriticalException("Environment variable PATH_CTL_FILES not found",null, false, true);
-		}
-		Path pathToCtl = new File(new File(path), "CS_SH_MQMONITOR_" + System.getProperty("app") + ".CTL").toPath();
-		boolean fileExists = Files.exists(pathToCtl, LinkOption.NOFOLLOW_LINKS);
-		if(!fileExists) {
-			logger.warn("CTL file for the service " + pathToCtl.getFileName() + " does not exist");
-		}
-		return fileExists;*/
-		return this.masterTask;
+		load(this.config);
 	}
 
 	public void stop() throws MonitorException {
@@ -86,30 +68,19 @@ public class MQMonitor extends AbstractMonitor  {
 
 	public void run() {		
 		try {
-			
-				init();
-				load();
-				while (keepRunning()) {
-					execute();
-					if (!taskSuccess) {
-						try {
-							logger.info("pausing for sometime");
-							pause();
-						} catch (PauseException e) {
-							logger.error("Exception Triggered in MQMonitor > run >"+e.getMessage(),e);
-							try {
-								Thread.sleep(10000);
-							} catch (InterruptedException ie) {
-								logger.error("Exception Triggered in MQMonitor > run >"+ie.getMessage());
-							}
-						}
-					}
-					
-					if(this.masterTask){
-						this.masterTask=false;
+			init();
+			execute();
+				try {
+					logger.info("pausing for sometime");
+					pause();
+				} catch (PauseException e) {
+					logger.error("Exception Triggered in MQMonitor > run >"+e.getMessage(),e);
+					try {
+						Thread.sleep(10000);
+					} catch (InterruptedException ie) {
+						logger.error("Exception Triggered in MQMonitor > run >"+ie.getMessage());
 					}
 				}
-			logger.info("Seems like services are down, it will not run further");
 			logger.info("=====================================================================================================================");
 		} catch (MonitorException e) {
 			logger.error("Exception Triggered in MQMonitor > run >"+e.getMessage(),e);
@@ -125,7 +96,8 @@ public class MQMonitor extends AbstractMonitor  {
 
 	public void pause() throws PauseException {
 		try {
-			Thread.sleep(Integer.parseInt(env.getProperty(System.getProperty("app").toUpperCase()+".waittime")));
+			Thread.sleep(Integer.parseInt(env.getProperty(System.getProperty(DDEConstants.APP).toUpperCase()
+					+DDEConstants.WAIT_TIME)));
 		} catch (InterruptedException | NumberFormatException e) {
 			try {
 				//It will wait for $default.waittime seconds otherwise 5 minutes
@@ -140,16 +112,12 @@ public class MQMonitor extends AbstractMonitor  {
 		return "monitor";
 	}
 
-	@Override
 	public void load(IMonitorConfig config) throws MonitorException {
 		Collection<Strategy> apps = config.getStrategyType();
 		for(Strategy app : apps) {
 			Runnable task = context.getBean(app.name(), Runnable.class);
 			allTasks.add(task);
-			if(DDEConstants.MASTER.equalsIgnoreCase( app.name())){
-				this.masterTask=true;
-			}
-				logger.info("Executing Task ----->>"+app.name().toUpperCase());
+			logger.info("Executing Task ----->>"+app.name().toUpperCase());
 		}
 		
 	}

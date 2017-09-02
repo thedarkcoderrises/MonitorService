@@ -42,4 +42,6 @@ public interface DDEConstants {
 	String RE_SCHEDULE = "RS";
 	Integer DEFAULT_THREAD_COUNT = 1;
 	Integer DEFAULT_THREAD_MAX_CORE_SIZE = 1;
+	String APP = "app";
+	String COUNTRY = "country";
 }

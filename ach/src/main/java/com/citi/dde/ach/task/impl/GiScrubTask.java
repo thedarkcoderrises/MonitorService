@@ -41,7 +41,7 @@ public class GiScrubTask extends ITaskRun implements ITaskDef<Integer>{
 		try {
 			process();
 		} catch (TaskException e) {
-			e.printStackTrace();
+			//
 		}
 	}
 
@@ -54,8 +54,8 @@ public class GiScrubTask extends ITaskRun implements ITaskDef<Integer>{
 				giScrubTaskService.executeTask();
 				pause();
 			}
-		} catch (Exception e) {
-			log.info("Thread :"+ITaskRun.getThreadName()+" stoped",ITaskRun.getThreadName() );
+		} catch (TaskException e) {
+			log.taskException(e);
 		}
 	return 0;
 	}

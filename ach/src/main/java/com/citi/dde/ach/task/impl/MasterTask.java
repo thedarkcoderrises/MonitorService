@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
 
@@ -46,7 +47,8 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 	private static Map<String,String> activeTaskMap;
 	
 
-	private Integer executeAllTaskAsThread() throws TaskException {
+	private Integer executeAllTaskAsThread(){
+		int allTask=0;
 		try{
 			List<Strategy> startergies = Strategy.MASTER.getSlaveStrategies();
 			for (Strategy strategy : startergies) {
@@ -54,19 +56,15 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 						for(int i=0;i<size;i++){
 							Runnable task = context.getBean(strategy.name(), Runnable.class);
 							taskExecutor.submit(task);
+							allTask++;
 						}
 			}
 			pause();
 		}catch(Exception e){
-			throw new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e);
+			log.taskException(new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e));
 		}
-		return 0;
+		return allTask;
 	}
-
-	/*private void isCancelled(Future<?> submit, String strategy) {
-		System.out.println("isCancelled :"+submit.isCancelled() +" "+strategy);
-		System.out.println("isDone :"+submit.isDone() +" "+strategy);
-	}*/
 
 	private int getThreadSize(Strategy strategy) {
 		String count = env.getProperty(strategy.getStrategy()+DDEConstants.THREAD_SIZE);
@@ -83,7 +81,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 		return cnt;
 	}
 
-	private void monitorAllThread() throws TaskException {
+	private void monitorAllThread() {
 		try{
 			while(keepRunning()){
 				try{
@@ -98,7 +96,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 				}
 			}	
 		}catch(Exception e){
-			throw new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e);
+			log.taskException(new TaskException(e.getMessage(),ITaskRun.getThreadName(),e));
 		}
 		
 	}
@@ -142,6 +140,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 			}
 		}
 		System.out.println("3."+getActiveTaskMap());
+		log.info("3."+getActiveTaskMap().toString(),DDEConstants.MASTER_TASK);
 		return failThreadMap;
 	}
 
@@ -149,7 +148,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 	@Override
 	@PostConstruct
 	public void init() throws TaskException {
-		this.activeTaskMap = new HashMap<String,String>();
+		this.activeTaskMap = new TreeMap<String,String>();
 	}
 
 
@@ -170,7 +169,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 		try {
 			process();
 		} catch (TaskException e) {
-			//
+			log.taskException(e);
 		}
 	}
 

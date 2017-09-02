@@ -2,8 +2,6 @@ package com.citi.dde.ach.task;
 
 import java.util.concurrent.Callable;
 
-import javax.annotation.PostConstruct;
-
 import com.citi.dde.common.exception.TaskException;
 
 public abstract interface ITaskDef<T>

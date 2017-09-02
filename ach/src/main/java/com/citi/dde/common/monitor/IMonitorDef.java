@@ -8,12 +8,6 @@ public abstract interface IMonitorDef
   public abstract void init()
     throws MonitorException;
   
-  public abstract void load()
-    throws MonitorException;
-  
-  public abstract boolean keepRunning()
-    throws MonitorException;
-  
   public abstract void execute()
     throws MonitorException;
   

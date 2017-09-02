@@ -9,6 +9,7 @@ import com.citi.dde.ach.service.GiRecvTaskService;
 import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.aop.LoggingAspect;
+import com.citi.dde.common.exception.DdeExecutionException;
 import com.citi.dde.common.exception.PauseException;
 import com.citi.dde.common.exception.TaskException;
 import com.citi.dde.common.util.Strategy;
@@ -50,9 +51,8 @@ public class GiRecvTask extends ITaskRun implements ITaskDef<Integer>{
 				giRecvTaskService.executeTask();
 				pause();
 			}
-		} catch (TaskException | PauseException e  ) {
-			//do something
-			log.info("Thread :"+ITaskRun.getThreadName()+" stoped",ITaskRun.getThreadName() );
+		}catch (TaskException  e) {
+			log.taskException(e);
 		}
 	return 0;
 	}

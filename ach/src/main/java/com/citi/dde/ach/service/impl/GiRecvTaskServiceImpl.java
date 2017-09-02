@@ -5,16 +5,23 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.citi.dde.ach.service.GiRecvTaskService;
 import com.citi.dde.ach.task.ITaskRun;
+import com.citi.dde.common.aop.LoggingAspect;
+import com.citi.dde.common.exception.DdeExecutionException;
 import com.citi.dde.common.exception.TaskException;
+import com.citi.dde.common.util.DDEConstants;
 
 @Service
 public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 
 	static boolean firstThread = true;
+	
+	@Autowired
+	LoggingAspect log;
 	
 	static List<String> temp= new ArrayList<String>();
 	List<String> files= new ArrayList<String>();
@@ -33,14 +40,19 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 			try{
 				if(firstThread){
 					throw new NullPointerException();
+				}else{
+					throw new DdeExecutionException("throwing Business Error");
 				}	
+			}catch(DdeExecutionException e){
+				firstThread=false;
+				log.debug(e.getMessage(), DDEConstants.GI_RECV_TASK);
 			}catch(Exception e){
 				firstThread=false;
-				throw new TaskException(e.getMessage(), ITaskRun.getThreadName(), e);
+				//throw all unpredictable exceptions
+				throw new TaskException(e.getMessage(), ITaskRun.getThreadName(), e);// This will also trigger Monitor that "this" task to be re-scheduled
 			}
 		}
-		
-//		processCommand();	
+//		processCommand();
 		return 0;
 	}
 
