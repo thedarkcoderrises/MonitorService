@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 import com.citi.dde.ach.service.GiRecvTaskService;
+import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.exception.TaskException;
 
 @Service
@@ -35,7 +36,7 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 				}	
 			}catch(Exception e){
 				firstThread=false;
-				throw new TaskException(e.getMessage(), Thread.currentThread().getName(), e);
+				throw new TaskException(e.getMessage(), ITaskRun.getThreadName(), e);
 			}
 		}
 		
@@ -54,9 +55,9 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
                 	}
         		}
                 	if(startReading){
-                		System.out.println(Thread.currentThread().getName()+" Start. File Archiving  = "+fileEntry);
+                		System.out.println(ITaskRun.getThreadName()+" Start. File Archiving  = "+fileEntry);
                 		  Thread.sleep(2000);
-                		  System.out.println(Thread.currentThread().getName()+" End. File Archiving  = "+fileEntry);
+                		  System.out.println(ITaskRun.getThreadName()+" End. File Archiving  = "+fileEntry);
                 	}
             }
           

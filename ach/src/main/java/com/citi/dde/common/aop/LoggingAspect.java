@@ -9,6 +9,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
+import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.ach.task.impl.MasterTask;
 import com.citi.dde.common.exception.CommonException;
 import com.citi.dde.common.exception.TaskException;
@@ -105,8 +106,11 @@ public class LoggingAspect {
 
 	@AfterThrowing(pointcut = "execution(* com.citi.dde.ach.*.*.*(..))", throwing = "ex")
 	public void taskException(TaskException ex) {
-		if (MasterTask.getActiveTaskMap().get(ex.getLogName()) != null){
-			MasterTask.getActiveTaskMap().put(ex.getLogName(),DDEConstants.DEACTIVE);
+		synchronized (MasterTask.getActiveTaskMap()) {
+			if (MasterTask.getActiveTaskMap().get(ex.getLogName()) != null){
+				MasterTask.getActiveTaskMap().put(ex.getLogName(),DDEConstants.DEACTIVE);
+				System.out.println("2."+MasterTask.getActiveTaskMap());
+			}
 		}
 		errorInterceptor(ex);
 	}

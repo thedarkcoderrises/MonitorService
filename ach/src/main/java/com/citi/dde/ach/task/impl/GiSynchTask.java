@@ -42,7 +42,7 @@ public class GiSynchTask extends ITaskRun implements ITaskDef<Integer>{
 	@Override
 	public Integer process() throws TaskException {
 		try {
-			setStrategy(Strategy.DATA_SYNC);
+			setCurrentTheadName(Strategy.DATA_SYNC);
 			while(keepRunning()){
 				pause();
 			}

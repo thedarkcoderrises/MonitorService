@@ -40,7 +40,7 @@ public class GiSendTask extends ITaskRun implements ITaskDef<Integer>{
 	public Integer process() throws TaskException {
 
 		try {
-			setStrategy(Strategy.MSG_SEND);
+			setCurrentTheadName(Strategy.MSG_SEND);
 			while(keepRunning()){
 				pause();
 			}

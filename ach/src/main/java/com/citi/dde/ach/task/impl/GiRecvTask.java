@@ -45,14 +45,14 @@ public class GiRecvTask extends ITaskRun implements ITaskDef<Integer>{
 	@Override
 	public Integer process() {
 		try {
-			setStrategy(Strategy.MSG_RECV);
+			setCurrentTheadName(Strategy.MSG_RECV);
 			while(keepRunning()){
 				giRecvTaskService.executeTask();
 				pause();
 			}
 		} catch (TaskException | PauseException e  ) {
 			//do something
-			log.info("Thread :"+Thread.currentThread().getName()+" stoped",Thread.currentThread().getName() );
+			log.info("Thread :"+ITaskRun.getThreadName()+" stoped",ITaskRun.getThreadName() );
 		}
 	return 0;
 	}

@@ -34,7 +34,6 @@ import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.citi.dde.ach.routeBuilder.CamelRouteBuilder;
@@ -133,18 +132,22 @@ public class ACHConfig implements ApplicationContextAware{
 	@Bean
 	public ConcurrentTaskExecutor taskExecutor(){
 		 ExecutorService executor = Executors.newFixedThreadPool(Integer.parseInt(maxPoolSize));// Excluding MASTER Strategy, Hence (length-1)
-		return new ConcurrentTaskExecutor(executor);
+		 return new ConcurrentTaskExecutor(executor);
+		//return new ConcurrentTaskExecutor(getExecutor());
 	}
 	
-	@Bean
-	public ThreadPoolTaskExecutor threadPoolTaskExecutor(){
-		ThreadPoolTaskExecutor tpte = new ThreadPoolTaskExecutor();
-		tpte.setMaxPoolSize(Integer.parseInt(maxPoolSize));
-		tpte.setCorePoolSize(Integer.parseInt(maxPoolSize));
-		return tpte;
+	/*@Bean
+	public ThreadPoolTaskExecutor getExecutor() {
+	    ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+	    threadPoolTaskExecutor.setCorePoolSize(3);
+	    threadPoolTaskExecutor.setMaxPoolSize(3);
+	    threadPoolTaskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+	    threadPoolTaskExecutor.setQueueCapacity(75);
+	    threadPoolTaskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+	    threadPoolTaskExecutor.initialize();
+	    return threadPoolTaskExecutor;
 	}
-
-
+*/
 	@Override
 	public void setApplicationContext(ApplicationContext ctx) throws BeansException {
 		this.context = ctx;

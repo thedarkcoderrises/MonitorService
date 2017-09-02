@@ -1,9 +1,11 @@
 package com.citi.dde.common.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public enum Strategy
@@ -13,7 +15,7 @@ public enum Strategy
   MSG_RECV(DDEConstants.GI_RECV_TASK), 
   DATA_SYNC(DDEConstants.GI_SYNCH_TASK), 
   NPCI_SVC(DDEConstants.NPCI_SVC_TASK), 
-  MASTER("ALL");
+  MASTER(DDEConstants.MASTER);
   
   private String strategy;
   
@@ -34,10 +36,21 @@ public enum Strategy
   }
   
 
+  
+  
   public Strategy[] getAllStratergies(){
 	 return Strategy.values();
   }
   
+  public List<Strategy> getSlaveStrategies(){
+	  List<Strategy> temp = new ArrayList<>();
+	  	for (Strategy strategy : Strategy.values()) {
+			if(!Strategy.MASTER.name().equalsIgnoreCase(strategy.name())){
+				temp.add(strategy);
+			}
+		}
+	  return temp;
+  }
 
 
 

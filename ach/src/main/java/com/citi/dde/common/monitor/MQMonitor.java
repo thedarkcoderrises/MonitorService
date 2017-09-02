@@ -47,7 +47,7 @@ public class MQMonitor extends AbstractMonitor  {
 	@Autowired
 	private ConcurrentTaskExecutor taskExecutor;
 	
-	private Collection<ITaskDef<?>> allTasks = new ArrayList<>();
+	private Collection<Runnable> allTasks = new ArrayList<>();
 
 
 	public MQMonitor(IMonitorConfig config) {
@@ -55,7 +55,7 @@ public class MQMonitor extends AbstractMonitor  {
 	}
 
 	public void execute() throws MonitorException {
-		for(ITaskDef<?> task : allTasks) {
+		for(Runnable task : allTasks) {
 			taskExecutor.submit(task);
 		}
 	}
@@ -144,7 +144,7 @@ public class MQMonitor extends AbstractMonitor  {
 	public void load(IMonitorConfig config) throws MonitorException {
 		Collection<Strategy> apps = config.getStrategyType();
 		for(Strategy app : apps) {
-			ITaskDef<?> task = context.getBean(app.name(), ITaskDef.class);
+			Runnable task = context.getBean(app.name(), Runnable.class);
 			allTasks.add(task);
 			if(DDEConstants.MASTER.equalsIgnoreCase( app.name())){
 				this.masterTask=true;

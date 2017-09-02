@@ -21,7 +21,7 @@ public class GiScrubTask extends ITaskRun implements ITaskDef<Integer>{
 	Environment env;
 	
 	@Autowired
-	GiScrubTaskService<Integer> giScrubTaskService;
+	GiScrubTaskService giScrubTaskService;
 	
 	@Autowired
 	LoggingAspect log;
@@ -49,13 +49,13 @@ public class GiScrubTask extends ITaskRun implements ITaskDef<Integer>{
 	@Override
 	public Integer process() throws TaskException {
 		try {
-			setStrategy(Strategy.GI_SCRUB);
+			setCurrentTheadName(Strategy.GI_SCRUB);
 			while(keepRunning()){
 				giScrubTaskService.executeTask();
 				pause();
 			}
 		} catch (Exception e) {
-			log.info("Thread :"+Thread.currentThread().getName()+" stoped",Thread.currentThread().getName() );
+			log.info("Thread :"+ITaskRun.getThreadName()+" stoped",ITaskRun.getThreadName() );
 		}
 	return 0;
 	}

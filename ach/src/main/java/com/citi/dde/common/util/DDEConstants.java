@@ -11,7 +11,7 @@ public interface DDEConstants {
 	String MSG_SEND_PAUSE ="MSG_SEND.waittime";
 	String MSG_RECV_PAUSE="MSG_RECV.waittime";
 	String NPCI_SVC_PAUSE="NPCI_SVC.waittime";*/
-	String MASTER_PAUSE="NPCI_SVC.waittime";
+	String MASTER_PAUSE="MASTER.waittime";
 	String DEFAULT_PAUSE = "default.waittime";
 	String WAIT_TIME=".waittime";
 	String MASTER = "MASTER"; 
@@ -39,7 +39,7 @@ public interface DDEConstants {
 	String THREAD_DELIMETER = "-thread-";
 	String THREAD_SIZE=".thread.size";
 	String IS_RUNNING = "...";
-	String NOT_APPLICABLE = "NA";
+	String RE_SCHEDULE = "RS";
 	Integer DEFAULT_THREAD_COUNT = 1;
 	Integer DEFAULT_THREAD_MAX_CORE_SIZE = 1;
 }

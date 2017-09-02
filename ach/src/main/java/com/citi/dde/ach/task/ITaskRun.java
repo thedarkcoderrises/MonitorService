@@ -16,26 +16,33 @@ public abstract class ITaskRun implements Runnable {
 	Environment env;
 	
 	public boolean keepRunning(){
-			MasterTask.getActiveTaskMap().put(getCurrentTheadName(), DDEConstants.ACTIVE);
-		System.out.println(Thread.currentThread().getName()+"...");
+		System.out.println(getThreadName()+DDEConstants.IS_RUNNING);
 		return true;
 	}
 	
-	private String getCurrentTheadName() {
-		String threadName =Thread.currentThread().getName();
-		if(threadName.contains(this.strategy.getStrategy())){
-			return threadName;
-		}else{
-			String threadNo = threadName.split(DDEConstants.THREAD_DELIMETER)[1];
-			threadName = this.strategy.getStrategy()+DDEConstants.UNDERSCORE+threadNo;
-			Thread.currentThread().setName(threadName);
-		}
-		return threadName;
+	public void setCurrentTheadName(Strategy strategy) {
+		String threadName =ITaskRun.getThreadName();
+		synchronized (MasterTask.getActiveTaskMap()) {
+				try{
+					this.strategy = strategy;
+					if(threadName.contains(strategy.getStrategy())){
+						return;
+					}else{
+						String threadNo = threadName.split(DDEConstants.THREAD_DELIMETER)[1];
+						threadName = strategy.getStrategy()+DDEConstants.UNDERSCORE+threadNo;
+						Thread.currentThread().setName(threadName);
+					}
+				}finally {
+					MasterTask.getActiveTaskMap().put(threadName, DDEConstants.ACTIVE);
+					System.out.println("1."+MasterTask.getActiveTaskMap());
+				}
+			}
+		
 	}
 	
 	public void pause() throws PauseException{
 		try {
-			Thread.sleep(Integer.parseInt(env.getProperty(getStrategy()+DDEConstants.WAIT_TIME)));
+			Thread.sleep(Integer.parseInt(env.getProperty(this.strategy+DDEConstants.WAIT_TIME)));
 		} catch (InterruptedException | NumberFormatException e) {
 			try {
 				Thread.sleep(Integer.parseInt(env.getProperty(DDEConstants.DEFAULT_PAUSE),300000));
@@ -53,6 +60,8 @@ public abstract class ITaskRun implements Runnable {
 		return strategy;
 	}
 	
-	
+	public static String getThreadName() {
+		return Thread.currentThread().getName();
+	}
 	
 }
