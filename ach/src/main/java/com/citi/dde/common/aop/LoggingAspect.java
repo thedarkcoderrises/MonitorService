@@ -45,26 +45,28 @@ public class LoggingAspect {
 		if(taskName == null || taskName.isEmpty()){
 			return log;
 		}
-		if(taskName.contains(DDEConstants.MASTER_TASK_CLASS)){
-			taskLog = Logger.getLogger(DDEConstants.MASTER_TASK_CLASS);
-		}else if(taskName.contains(DDEConstants.TASK1_CLASS)){
-			taskLog = Logger.getLogger(DDEConstants.TASK1_CLASS);
-		}else if(taskName.contains(DDEConstants.TASK2_CLASS)){
-			taskLog = Logger.getLogger(DDEConstants.TASK2_CLASS);
-		}else if(taskName.contains(DDEConstants.TASK3_CLASS)){
-			taskLog = Logger.getLogger(DDEConstants.TASK3_CLASS);
-		}else if(taskName.contains(DDEConstants.TASK4_CLASS)){
-			taskLog = Logger.getLogger(DDEConstants.TASK4_CLASS);
-		}else if(taskName.contains(DDEConstants.TASK5_CLASS)){
-			taskLog = Logger.getLogger(DDEConstants.TASK5_CLASS);
-		}else{
-			taskLog =log;
+		synchronized (taskName) {
+			if(taskName.contains(DDEConstants.MASTER_TASK_CLASS)){
+				taskLog = Logger.getLogger(DDEConstants.MASTER_TASK_CLASS);
+			}else if(taskName.contains(DDEConstants.TASK1_CLASS)){
+				taskLog = Logger.getLogger(DDEConstants.TASK1_CLASS);
+			}else if(taskName.contains(DDEConstants.TASK2_CLASS)){
+				taskLog = Logger.getLogger(DDEConstants.TASK2_CLASS);
+			}else if(taskName.contains(DDEConstants.TASK3_CLASS)){
+				taskLog = Logger.getLogger(DDEConstants.TASK3_CLASS);
+			}else if(taskName.contains(DDEConstants.TASK4_CLASS)){
+				taskLog = Logger.getLogger(DDEConstants.TASK4_CLASS);
+			}else if(taskName.contains(DDEConstants.TASK5_CLASS)){
+				taskLog = Logger.getLogger(DDEConstants.TASK5_CLASS);
+			}else{
+				taskLog =log;
+			}
+			return taskLog;
 		}
-		return taskLog;
 	}
 
-	@AfterThrowing(pointcut = "execution(* com.citi.dde.ach.*.*.*(..))", throwing = "ex")
-	public void errorInterceptor(Exception ex) {
+//	@AfterThrowing(pointcut = "execution(* com.citi.dde.ach.*.*.*(..))", throwing = "ex")
+	private void errorInterceptor(Exception ex) {
 		Logger taskLog;
 		if(ex instanceof CommonException){
 			String loggerName = ITaskRun.getThreadName();
@@ -83,16 +85,16 @@ public class LoggingAspect {
 	    }
 	}
 	
-	public void debug(String info, String loggger){
-		log(info,getLogger(loggger),DDEConstants.DEBUG);
+	public void debug(String info){
+		log(info,getLogger(ITaskRun.getThreadName()),DDEConstants.DEBUG);
 	}
 	
-	public void info(String info, String loggger){
-		log(info,getLogger(loggger),DDEConstants.INFO);
+	public void info(String info){
+		log(info,getLogger(ITaskRun.getThreadName()),DDEConstants.INFO);
 	}
 	
-	public void error(String info, String loggger){
-		log(info,getLogger(loggger),DDEConstants.ERROR);
+	public void error(String info){
+		log(info,getLogger(ITaskRun.getThreadName()),DDEConstants.ERROR);
 	}
 	
 	
@@ -118,10 +120,10 @@ public class LoggingAspect {
 				if (DDEConstants.ACTIVE.equals(isRunning)){
 					MasterTask.getActiveTaskMap().put(threadName,DDEConstants.DEACTIVE);
 					System.out.println("2."+MasterTask.getActiveTaskMap());
-					info("2."+MasterTask.getActiveTaskMap().toString(),DDEConstants.MASTER_TASK);
+					info("2."+MasterTask.getActiveTaskMap().toString());
 					raiseVT();
 				}else{
-					error("Invalid Thread :"+threadName+" its status :"+isRunning, DDEConstants.MASTER_TASK);
+					error("Invalid Thread :"+threadName+" its status :"+isRunning);
 				}
 			}
 			errorInterceptor(ex);
@@ -133,6 +135,6 @@ public class LoggingAspect {
 	}
 
 	private void raiseVT() {
-		info("VT Raised", DDEConstants.MASTER_TASK);
+		info("VT Raised");
 	}
 }

@@ -61,7 +61,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 			}
 			pause();
 		}catch(Exception e){
-			log.interceptException(new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e));
+			log.error(e.getMessage());
 		}
 		return allTask;
 	}
@@ -75,7 +75,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 			}catch(NumberFormatException e){
 				cnt =DDEConstants.DEFAULT_THREAD_COUNT;
 			}finally{
-				log.info(strategy.getStrategy()+" Thread Count : "+cnt, DDEConstants.MASTER_TASK);
+				log.info(strategy.getStrategy()+" Thread Count : "+cnt);
 			}
 		}
 		return cnt;
@@ -87,7 +87,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 				try{
 					Map<String,Integer> failThreadMap = getFailThreads();
 					if(CollectionUtils.isEmpty(failThreadMap)){
-						log.info("All Threads Spawned", DDEConstants.MASTER_TASK);
+						log.info("All Threads Spawned");
 					}else{
 						executeFailTaskAsThread(failThreadMap);
 					}	
@@ -131,16 +131,16 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 						count = failThreadMap.get(strategyCode);
 						failThreadMap.put(strategyCode, ++count);
 					}
-					log.error("Thread execution fail: "+threadName, threadName);
-					log.error("Thread execution fail: "+threadName, DDEConstants.MASTER_TASK);
+					log.error("Thread execution fail: "+threadName);
+					log.error("Thread execution fail: "+threadName);
 					getActiveTaskMap().put(threadName, DDEConstants.RE_SCHEDULE);
 				}else if(DDEConstants.ACTIVE.equals(isRunning)){
-					log.info("Thread: "+threadName+DDEConstants.IS_RUNNING, DDEConstants.MASTER_TASK);
+					log.info("Thread: "+threadName+DDEConstants.IS_RUNNING);
 				}
 			}
 		}
 		System.out.println("3."+getActiveTaskMap());
-		log.info("3."+getActiveTaskMap().toString(),DDEConstants.MASTER_TASK);
+		log.info("3."+getActiveTaskMap().toString());
 		return failThreadMap;
 	}
 

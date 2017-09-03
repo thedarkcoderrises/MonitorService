@@ -22,7 +22,7 @@ public abstract class ITaskRun implements Runnable {
 	
 	public boolean keepRunning(){
 		System.out.println(getThreadName()+DDEConstants.IS_RUNNING);
-		log.info(getThreadName()+DDEConstants.IS_RUNNING, DDEConstants.MASTER_TASK);
+		log.info(getThreadName()+DDEConstants.IS_RUNNING);
 		return true;
 	}
 	
@@ -42,12 +42,12 @@ public abstract class ITaskRun implements Runnable {
 					}finally {
 						MasterTask.getActiveTaskMap().put(threadName, DDEConstants.ACTIVE);
 						System.out.println("1."+MasterTask.getActiveTaskMap());
-						log.info("1."+MasterTask.getActiveTaskMap().toString(),DDEConstants.MASTER_TASK);
+						log.info("1."+MasterTask.getActiveTaskMap().toString());
 					}
 				}
 			
 		}catch(Exception e){
-			log.error(e.getMessage(), DDEConstants.MASTER_TASK);			
+			log.error(e.getMessage());			
 		}
 		
 	}
@@ -56,11 +56,11 @@ public abstract class ITaskRun implements Runnable {
 		try {
 			Thread.sleep(Integer.parseInt(env.getProperty(this.strategy+DDEConstants.WAIT_TIME)));
 		} catch (InterruptedException | NumberFormatException e) {
-			log.error(e.getMessage(), getThreadName());
+			log.error(e.getMessage());
 			try {
 				Thread.sleep(Integer.parseInt(env.getProperty(DDEConstants.DEFAULT_PAUSE),300000));
 			} catch (NumberFormatException | InterruptedException e1) {
-				log.error(e.getMessage(), getThreadName());
+				log.error(e.getMessage());
 			}
 		}
 	}

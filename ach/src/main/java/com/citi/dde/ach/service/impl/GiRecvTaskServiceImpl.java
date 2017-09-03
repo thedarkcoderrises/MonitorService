@@ -35,7 +35,7 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 	}
 	@Override
 	public Integer executeTask() throws Exception {
-		synchronized (this) {
+		/*synchronized (this) {
 				if(firstThread){
 					firstThread=false;
 					throw new NullPointerException(); //unpredictable exception
@@ -47,7 +47,7 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 						businessLogic2();
 					}
 				}	
-		}
+		}*/
 //		processCommand();
 		return 0;
 	}

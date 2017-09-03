@@ -9,10 +9,10 @@ public class GiScrubTaskServiceImpl implements GiScrubTaskService {
 
 	@Override
 	public Integer executeTask() throws Exception {
-			if(true){
+			/*if(true){
 				Thread.sleep(4000);
 				throw new NullPointerException();
-			}	
+			}*/	
 		return null;
 	}
 

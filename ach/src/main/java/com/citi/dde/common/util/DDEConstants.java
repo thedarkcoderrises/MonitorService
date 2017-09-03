@@ -18,7 +18,7 @@ public interface DDEConstants {
 	String TASK1_CLASS="GiRecvTask";
 	String TASK2_CLASS="GiScrubTask";
 	String TASK3_CLASS="GiSynchTask";
-	String MASTER_TASK_CLASS="MasterTask";
+	String MASTER_TASK_CLASS="MASTER";
 	String TASK4_CLASS="NPCIServcTask";
 	String TASK5_CLASS="GiSendTask";
 	String BEFORE_LOG = "IN :";
