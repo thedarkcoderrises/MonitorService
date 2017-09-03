@@ -61,7 +61,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 			}
 			pause();
 		}catch(Exception e){
-			log.taskException(new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e));
+			log.interceptException(new TaskException(e.getMessage(),DDEConstants.MASTER_TASK,e));
 		}
 		return allTask;
 	}
@@ -96,7 +96,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 				}
 			}	
 		}catch(Exception e){
-			log.taskException(new TaskException(e.getMessage(),ITaskRun.getThreadName(),e));
+			log.interceptException(new TaskException(e.getMessage(),ITaskRun.getThreadName(),e));
 		}
 		
 	}
@@ -153,11 +153,15 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 
 
 	@Override
-	public Integer process() throws TaskException {
-		 setCurrentTheadName(Strategy.MASTER);
-		 executeAllTaskAsThread();
-		 monitorAllThread();
-		 return 0;
+	public Integer process() {
+		try{
+			setCurrentTheadName(Strategy.MASTER);
+			 executeAllTaskAsThread();
+			 monitorAllThread();
+		}catch(Exception e){
+			log.interceptException(e);
+		}
+		 return 0;		 
 	}
 
 	public static Map<String, String> getActiveTaskMap() {
@@ -166,11 +170,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 
 	@Override
 	public void run() {
-		try {
 			process();
-		} catch (TaskException e) {
-			log.taskException(e);
-		}
 	}
 
 	

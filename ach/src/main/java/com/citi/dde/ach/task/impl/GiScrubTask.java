@@ -38,25 +38,22 @@ public class GiScrubTask extends ITaskRun implements ITaskDef<Integer>{
 	
 	@Override
 	public void run() {
-		try {
 			process();
-		} catch (TaskException e) {
-			//
-		}
 	}
 
 
 	@Override
-	public Integer process() throws TaskException {
-		try {
+	public Integer process() {
+		try{
 			setCurrentTheadName(Strategy.GI_SCRUB);
 			while(keepRunning()){
 				giScrubTaskService.executeTask();
 				pause();
-			}
-		} catch (TaskException e) {
-			log.taskException(e);
+			}	
+		}catch(Exception e){
+			log.interceptException(e);
 		}
+		
 	return 0;
 	}
 }

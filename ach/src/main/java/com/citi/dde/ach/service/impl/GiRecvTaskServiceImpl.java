@@ -13,7 +13,6 @@ import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.aop.LoggingAspect;
 import com.citi.dde.common.exception.DdeExecutionException;
 import com.citi.dde.common.exception.TaskException;
-import com.citi.dde.common.util.DDEConstants;
 
 @Service
 public class GiRecvTaskServiceImpl implements GiRecvTaskService {
@@ -35,27 +34,30 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 		}
 	}
 	@Override
-	public Integer executeTask() throws TaskException {
+	public Integer executeTask() throws Exception {
 		synchronized (this) {
-			try{
 				if(firstThread){
-					throw new NullPointerException();
+					firstThread=false;
+					throw new NullPointerException(); //unpredictable exception
 				}else{
-					throw new DdeExecutionException("throwing Business Error");
+					try{
+						businessLogic1();	
+					}catch(DdeExecutionException e){
+						log.ddeExecutionException(e);
+						businessLogic2();
+					}
 				}	
-			}catch(DdeExecutionException e){
-				firstThread=false;
-				log.debug(e.getMessage(), DDEConstants.GI_RECV_TASK);
-			}catch(Exception e){
-				firstThread=false;
-				//throw all unpredictable exceptions
-				throw new TaskException(e.getMessage(), ITaskRun.getThreadName(), e);// This will also trigger Monitor that "this" task to be re-scheduled
-			}
 		}
 //		processCommand();
 		return 0;
 	}
 
+	private void businessLogic2() {
+		return;
+	}
+	private void businessLogic1() throws DdeExecutionException {
+		throw new DdeExecutionException("throwing Business Error");		
+	}
 	private void processCommand() {
         try {
         	for (final String fileEntry : files) {

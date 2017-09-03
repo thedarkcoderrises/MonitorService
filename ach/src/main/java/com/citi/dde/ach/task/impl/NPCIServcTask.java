@@ -30,24 +30,16 @@ public class NPCIServcTask extends ITaskRun implements ITaskDef<Integer>{
 	
 	@Override
 	public void run() {
-		try {
 			process();
-		} catch (TaskException e) {
-			e.printStackTrace();
-		}
 	}
 
 
 	@Override
-	public Integer process() throws TaskException {
-		try {
+	public Integer process() {
 			setCurrentTheadName(Strategy.NPCI_SVC);
 			while(keepRunning()){
 				pause();
 			}
-		} catch (Exception e) {
-			throw new TaskException(e.getMessage(),ITaskRun.getThreadName(),e);
-		}
 	return 0;
 	}
 }

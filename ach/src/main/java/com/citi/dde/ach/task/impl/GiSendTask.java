@@ -28,25 +28,16 @@ public class GiSendTask extends ITaskRun implements ITaskDef<Integer>{
 
 	@Override
 	public void run() {
-		try {
 			process();
-		} catch (TaskException e) {
-			//
-		}
 	}
 
 
 	@Override
-	public Integer process() throws TaskException {
-
-		try {
+	public Integer process(){
 			setCurrentTheadName(Strategy.MSG_SEND);
 			while(keepRunning()){
 				pause();
 			}
-		} catch (Exception e) {
-			throw new TaskException(e.getMessage(),ITaskRun.getThreadName(),e);
-		}
 	return 0;
 	}
 }

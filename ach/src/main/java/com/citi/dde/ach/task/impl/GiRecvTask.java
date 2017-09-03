@@ -9,8 +9,6 @@ import com.citi.dde.ach.service.GiRecvTaskService;
 import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.aop.LoggingAspect;
-import com.citi.dde.common.exception.DdeExecutionException;
-import com.citi.dde.common.exception.PauseException;
 import com.citi.dde.common.exception.TaskException;
 import com.citi.dde.common.util.Strategy;
 
@@ -33,27 +31,28 @@ public class GiRecvTask extends ITaskRun implements ITaskDef<Integer>{
 	}
 
 	@Override
-	public void init() throws TaskException {
+	public void init() throws Exception {
 	}
 
 
 	@Override
 	public void run() {
-			process();
+		process();
 	}
 
 
 	@Override
-	public Integer process() {
-		try {
+	public Integer process(){
+		try{
 			setCurrentTheadName(Strategy.MSG_RECV);
 			while(keepRunning()){
 				giRecvTaskService.executeTask();
 				pause();
 			}
-		}catch (TaskException  e) {
-			log.taskException(e);
+		}catch(Exception e){
+			log.interceptException(e);
 		}
+			
 	return 0;
 	}
 	

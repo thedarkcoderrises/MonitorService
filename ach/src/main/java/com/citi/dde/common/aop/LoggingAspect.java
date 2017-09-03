@@ -9,8 +9,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
+import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.ach.task.impl.MasterTask;
 import com.citi.dde.common.exception.CommonException;
+import com.citi.dde.common.exception.DdeExecutionException;
 import com.citi.dde.common.exception.TaskException;
 import com.citi.dde.common.util.DDEConstants;
 
@@ -33,7 +35,7 @@ public class LoggingAspect {
 
 	private void logBeforeAndAfter(JoinPoint joinPoint, String logCase) {
 		Logger taskLog =getLogger(joinPoint.getTarget().getClass().getName());
-		taskLog.debug(logCase + joinPoint.getSignature());
+		taskLog.debug(logCase + "Target Class :" +joinPoint.getTarget().getClass().getName() +", Method :"+joinPoint.getSignature().getName());
 	}
 	
 	
@@ -65,7 +67,7 @@ public class LoggingAspect {
 	public void errorInterceptor(Exception ex) {
 		Logger taskLog;
 		if(ex instanceof CommonException){
-			String loggerName = ((CommonException)ex).getLogName().split(DDEConstants.UNDERSCORE)[0];
+			String loggerName = ITaskRun.getThreadName();
 			taskLog = getLogger(loggerName);
 		}else{
 			taskLog = log;
@@ -96,29 +98,41 @@ public class LoggingAspect {
 	
 	private void log(String info, Logger logger, String logType) {
 		switch(logType){
-		case DDEConstants.DEBUG : logger.debug(info); break;
-		case DDEConstants.INFO : logger.info(info); break;
-		case DDEConstants.ERROR : logger.error(info); break;
-		default :logger.debug(info); break;
+			case DDEConstants.DEBUG : logger.debug(info); break;
+			case DDEConstants.INFO : logger.info(info); break;
+			case DDEConstants.ERROR : logger.error(info); break;
+			default :logger.debug(info); break;
 		}
 	}
 
-	@AfterThrowing(pointcut = "execution(* com.citi.dde.ach.*.*.*(..))", throwing = "ex")
-	public void taskException(TaskException ex) {
-		synchronized (MasterTask.getActiveTaskMap()) { // Reschedule Task
-			if (MasterTask.getActiveTaskMap().get(ex.getLogName()) != null){
-				MasterTask.getActiveTaskMap().put(ex.getLogName(),DDEConstants.DEACTIVE);
-				System.out.println("2."+MasterTask.getActiveTaskMap());
-				info("2."+MasterTask.getActiveTaskMap().toString(),DDEConstants.MASTER_TASK);
-			}else{
-				info("Invalig Logger :"+ex.getLogName(), DDEConstants.MASTER_TASK);
+//	@AfterThrowing(pointcut = "execution(* com.citi.dde.ach.*.*.*(..))", throwing = "ex")
+	public void interceptException(Exception ex) {
+		if(ex instanceof DdeExecutionException){
+			errorInterceptor((DdeExecutionException)ex);
+		}else if(ex instanceof TaskException){
+			errorInterceptor((TaskException)ex);
+		}else{
+			synchronized (MasterTask.getActiveTaskMap()) { // Reschedule Task
+				String threadName = ITaskRun.getThreadName();
+				String isRunning = MasterTask.getActiveTaskMap().get(threadName);
+				if (DDEConstants.ACTIVE.equals(isRunning)){
+					MasterTask.getActiveTaskMap().put(threadName,DDEConstants.DEACTIVE);
+					System.out.println("2."+MasterTask.getActiveTaskMap());
+					info("2."+MasterTask.getActiveTaskMap().toString(),DDEConstants.MASTER_TASK);
+					raiseVT();
+				}else{
+					error("Invalid Thread :"+threadName+" its status :"+isRunning, DDEConstants.MASTER_TASK);
+				}
 			}
+			errorInterceptor(ex);
 		}
-		raiseVT();
+	}
+	
+	public void ddeExecutionException(DdeExecutionException ex) {
 		errorInterceptor(ex);
 	}
 
 	private void raiseVT() {
-		// TODO Auto-generated method stub
+		info("VT Raised", DDEConstants.MASTER_TASK);
 	}
 }
