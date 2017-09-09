@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.citi.dde.ach.service.JobWatcherService;
 import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.aop.LoggingAspect;
@@ -37,6 +38,9 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 	private ApplicationContext context;
 	
 	@Autowired
+	JobWatcherService jobWatcherService;
+	
+	@Autowired
 	Environment env;
 	
 	@Override
@@ -44,7 +48,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 		return process();
 	}
 	
-	private static Map<String,String> activeTaskMap;
+	private static volatile Map<String,String> activeTaskMap;
 	
 
 	private Integer executeAllTaskAsThread(){
@@ -52,12 +56,17 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 		try{
 			List<Strategy> startergies = Strategy.MASTER.getSlaveStrategies();
 			for (Strategy strategy : startergies) {
-					int size = getThreadSize(strategy);
-						for(int i=0;i<size;i++){
-							Runnable task = context.getBean(strategy.name(), Runnable.class);
-							taskExecutor.submit(task);
-							allTask++;
-						}
+				String strategyCode = strategy.getStrategy();
+				if(canSchedule(strategyCode)){
+					int size = getJobDetailMap().get(strategyCode).getThreadCount();
+					for(int i=0;i<size;i++){
+						Runnable task = context.getBean(strategy.name(), Runnable.class);
+						taskExecutor.submit(task);
+						allTask++;
+					}
+				}else{
+					log.info("NE as per JD of strategy :"+strategyCode);
+				}
 			}
 			pause();
 		}catch(Exception e){
@@ -66,25 +75,12 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 		return allTask;
 	}
 
-	private int getThreadSize(Strategy strategy) {
-		String count = env.getProperty(strategy.getStrategy()+DDEConstants.THREAD_SIZE);
-		int cnt =0;
-		if(!StringUtils.isEmpty(count)){
-			try{
-				cnt= Integer.parseInt(count);	
-			}catch(NumberFormatException e){
-				cnt =DDEConstants.DEFAULT_THREAD_COUNT;
-			}finally{
-				log.info(strategy.getStrategy()+" Thread Count : "+cnt);
-			}
-		}
-		return cnt;
-	}
 
 	private void monitorAllThread() {
 		try{
-			while(keepRunning()){
+			while(true){
 				try{
+					System.out.println(getThreadName()+DDEConstants.IS_RUNNING);
 					Map<String,Integer> failThreadMap = getFailThreads();
 					if(CollectionUtils.isEmpty(failThreadMap)){
 						log.info("All Threads Spawned");
@@ -93,6 +89,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 					}	
 				}finally {
 					pause();
+					refreshJobDetailMap();
 				}
 			}	
 		}catch(Exception e){
@@ -107,8 +104,12 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 				int size = failThreadMap.get(strategyCode);
 				for(int i=0;i<size;i++){
 					String strategy = Strategy.getStrategy(strategyCode).name();
-					Runnable task = context.getBean(strategy, Runnable.class);
-					taskExecutor.submit(task);
+					if(canSchedule(strategyCode)){
+						Runnable task = context.getBean(strategy, Runnable.class);
+						taskExecutor.submit(task);
+					}else{
+						log.info("NE as per JD of strategy :"+strategy);
+					}
 				}
 			}
 		}catch(Exception e){
@@ -123,8 +124,8 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 			int count =0;
 			for (String threadName : activeThreadSet) {
 				String isRunning = getActiveTaskMap().get(threadName);
+				String strategyCode  = threadName.split(DDEConstants.UNDERSCORE)[0];
 				if(DDEConstants.DEACTIVE.equals(isRunning)){
-					String strategyCode  = threadName.split(DDEConstants.UNDERSCORE)[0];
 					if(!failThreadMap.containsKey(strategyCode)){
 						failThreadMap.put(strategyCode, 1);
 					}else{
@@ -134,6 +135,13 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 					log.error("Thread execution fail: "+threadName);
 					log.error("Thread execution fail: "+threadName);
 					getActiveTaskMap().put(threadName, DDEConstants.RE_SCHEDULE);
+				}else if(DDEConstants.NOT_ELIGIBLE.equals(isRunning)){
+					getActiveTaskMap().put(threadName, DDEConstants.RE_SCHEDULE);
+					int threadSize = getJobDetailMap().get(strategyCode).getThreadCount();
+					failThreadMap.put(strategyCode, threadSize);
+				}else if(DDEConstants.RE_SCHEDULE.equals(isRunning)){
+					int threadSize = getJobDetailMap().get(strategyCode).getThreadCount();
+					failThreadMap.put(strategyCode, threadSize);
 				}else if(DDEConstants.ACTIVE.equals(isRunning)){
 					log.info("Thread: "+threadName+DDEConstants.IS_RUNNING);
 				}
@@ -149,6 +157,7 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 	@PostConstruct
 	public void init() throws TaskException {
 		this.activeTaskMap = new TreeMap<String,String>();
+		refreshJobDetailMap();
 	}
 
 
@@ -156,8 +165,8 @@ public class MasterTask extends ITaskRun implements ITaskDef<Integer>{
 	public Integer process() {
 		try{
 			setCurrentTheadName(Strategy.MASTER);
-			 executeAllTaskAsThread();
-			 monitorAllThread();
+			executeAllTaskAsThread();
+			monitorAllThread();
 		}catch(Exception e){
 			log.interceptException(e);
 		}

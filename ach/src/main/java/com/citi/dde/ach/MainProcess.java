@@ -5,7 +5,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import com.citi.dde.ach.config.ACHConfig;
 import com.citi.dde.common.monitor.IMonitorDef;
-import com.citi.dde.common.monitor.MQMonitor;
+import com.citi.dde.common.monitor.Monitor;
 
 
 /**
@@ -23,7 +23,7 @@ public class MainProcess
     	try{
     	ApplicationContext context = new AnnotationConfigApplicationContext(ACHConfig.class);
     	
-    	IMonitorDef monitor = context.getBean("mq-monitor", MQMonitor.class);
+    	IMonitorDef monitor = context.getBean("mq-monitor", Monitor.class);
 		Thread mainThread = new Thread(monitor);
 		mainThread.start();
 		

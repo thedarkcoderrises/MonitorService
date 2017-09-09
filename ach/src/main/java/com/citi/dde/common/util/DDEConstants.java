@@ -44,4 +44,5 @@ public interface DDEConstants {
 	Integer DEFAULT_THREAD_MAX_CORE_SIZE = 1;
 	String APP = "app";
 	String COUNTRY = "country";
+	String NOT_ELIGIBLE = "NE";
 }

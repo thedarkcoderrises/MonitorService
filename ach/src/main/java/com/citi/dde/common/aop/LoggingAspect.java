@@ -109,7 +109,7 @@ public class LoggingAspect {
 
 //	@AfterThrowing(pointcut = "execution(* com.citi.dde.ach.*.*.*(..))", throwing = "ex")
 	public void interceptException(Exception ex) {
-		if(ex instanceof DdeExecutionException){
+		/*if(ex instanceof DdeExecutionException){
 			errorInterceptor((DdeExecutionException)ex);
 		}else if(ex instanceof TaskException){
 			errorInterceptor((TaskException)ex);
@@ -127,7 +127,8 @@ public class LoggingAspect {
 				}
 			}
 			errorInterceptor(ex);
-		}
+		}*/
+		errorInterceptor(ex);
 	}
 	
 	public void ddeExecutionException(DdeExecutionException ex) {

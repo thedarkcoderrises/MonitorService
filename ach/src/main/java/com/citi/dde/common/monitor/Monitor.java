@@ -5,6 +5,9 @@ package com.citi.dde.common.monitor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -14,6 +17,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import com.citi.dde.ach.entity.JobWatcherVO;
+import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.exception.MonitorException;
 import com.citi.dde.common.exception.PauseException;
 import com.citi.dde.common.util.DDEConstants;
@@ -26,14 +31,14 @@ import com.citi.dde.common.util.Strategy;
  * 
  */
 @Component("mq-monitor")
-public class MQMonitor implements IMonitorDef  {
+public class Monitor implements IMonitorDef  {
 
 
 	private IMonitorConfig config;
 	
 	int SYSTEM_EXIT=0;
 
-	private static final Logger logger = LogManager.getLogger(MQMonitor.class);
+	private static final Logger logger = LogManager.getLogger(Monitor.class);
 	
 	@Autowired
 	private Environment env;
@@ -47,11 +52,21 @@ public class MQMonitor implements IMonitorDef  {
 	private Collection<Runnable> allTasks = new ArrayList<>();
 
 
-	public MQMonitor(IMonitorConfig config) {
+	public Monitor(IMonitorConfig config) {
 		this.config=config;
 	}
 
 	public void execute() throws MonitorException {
+		boolean flag= true;
+		try{
+			int maxPoolSize = ITaskRun.getJobDetailMap().get(DDEConstants.MASTER).getThreadCount();
+			System.out.println("Max Thread Pool :"+maxPoolSize);
+			 ExecutorService executor = Executors.newFixedThreadPool(maxPoolSize);
+			 taskExecutor.setConcurrentExecutor(executor);
+		}catch(Exception e){
+			flag = false;
+		}
+		if(flag)
 		for(Runnable task : allTasks) {
 			taskExecutor.submit(task);
 		}

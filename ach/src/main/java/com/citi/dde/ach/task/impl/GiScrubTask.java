@@ -10,6 +10,7 @@ import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.aop.LoggingAspect;
 import com.citi.dde.common.exception.TaskException;
+import com.citi.dde.common.util.DDEConstants;
 import com.citi.dde.common.util.Strategy;
 
 
@@ -44,6 +45,7 @@ public class GiScrubTask extends ITaskRun implements ITaskDef<Integer>{
 
 	@Override
 	public Integer process() {
+		boolean failSafe = true;
 		try{
 			setCurrentTheadName(Strategy.GI_SCRUB);
 			while(keepRunning()){
@@ -51,7 +53,12 @@ public class GiScrubTask extends ITaskRun implements ITaskDef<Integer>{
 				pause();
 			}	
 		}catch(Exception e){
+			failSafe = false;
 			log.interceptException(e);
+		}finally {
+			if(!failSafe){
+				updateThreadStatus(getThreadName(),DDEConstants.DEACTIVE);
+			}
 		}
 		
 	return 0;

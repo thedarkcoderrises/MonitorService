@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.exception.TaskException;
+import com.citi.dde.common.util.DDEConstants;
 import com.citi.dde.common.util.Strategy;
 
 
@@ -36,9 +37,18 @@ public class NPCIServcTask extends ITaskRun implements ITaskDef<Integer>{
 
 	@Override
 	public Integer process() {
-			setCurrentTheadName(Strategy.NPCI_SVC);
-			while(keepRunning()){
-				pause();
+			boolean failSafe = true;
+			try{
+				setCurrentTheadName(Strategy.NPCI_SVC);
+				while(keepRunning()){
+					pause();
+				}	
+			}catch(Exception e){
+				failSafe = false;
+			}finally {
+				if(!failSafe){
+					updateThreadStatus(getThreadName(),DDEConstants.DEACTIVE);
+				}
 			}
 	return 0;
 	}

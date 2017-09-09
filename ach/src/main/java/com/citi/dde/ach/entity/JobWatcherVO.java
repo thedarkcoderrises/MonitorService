@@ -19,6 +19,13 @@ package com.citi.dde.ach.entity;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="JB_TM_MONITOR_CONFIG")
 public class JobWatcherVO implements Serializable {
 	
 	/**
@@ -29,58 +36,46 @@ public class JobWatcherVO implements Serializable {
 	/**
 	 * The job Id
 	 */
+	@Id
+	@Column(name="JOB_ID")
 	private String jobid;
-	
-	/**
-	 * The workflow id
-	 */
-	private String workflow_id;
-	
-	/**
-	 * The Job Type
-	 */
-	private String job_type;
 	
 	/**
 	 * The job start time
 	 */
-	private String start_time;
+	@Column(name="START_TIME")
+	private Integer start_time;
 	
 	/**
 	 * The Job End Time
 	 */
-	private String end_time;
-	
-	/**
-	 * The Job Interval
-	 */
-	private Integer interval;
-	
-	/**
-	 * The job Triger time in case of job type is adhoc
-	 */
-	private String job_time;
+	@Column(name="END_TIME")
+	private Integer end_time;
 	
 	/**
 	 * The job Status
 	 */
+	@Column(name="JOB_STATUS")
 	private String job_status;
 	
 	/**
 	 * The Job Description
 	 */
+	@Column(name="JOB_DESC")
 	private String job_desc;
 	
 	/**
 	 * The Run Status
 	 */
+	@Column(name="RUN_STATUS")
 	private String run_status ;
 	
 	/**
-	 * The Next run time
+	 * The threadCount
 	 */
-	private String next_run_time;
-
+	@Column(name="THREAD_CNT")
+	private Integer threadCount;
+	
 	/**
 	 * @return the jobid
 	 */
@@ -96,88 +91,33 @@ public class JobWatcherVO implements Serializable {
 	}
 
 	/**
-	 * @return the workflow_id
-	 */
-	public String getWorkflow_id() {
-		return workflow_id;
-	}
-
-	/**
-	 * @param workflow_id the workflow_id to set
-	 */
-	public void setWorkflow_id(String workflow_id) {
-		this.workflow_id = workflow_id;
-	}
-
-	/**
-	 * @return the job_type
-	 */
-	public String getJob_type() {
-		return job_type;
-	}
-
-	/**
-	 * @param job_type the job_type to set
-	 */
-	public void setJob_type(String job_type) {
-		this.job_type = job_type;
-	}
-
-	/**
 	 * @return the start_time
 	 */
-	public String getStart_time() {
+	public Integer getStart_time() {
 		return start_time;
 	}
 
 	/**
 	 * @param start_time the start_time to set
 	 */
-	public void setStart_time(String start_time) {
+	public void setStart_time(Integer start_time) {
 		this.start_time = start_time;
 	}
 
 	/**
 	 * @return the end_time
 	 */
-	public String getEnd_time() {
+	public Integer getEnd_time() {
 		return end_time;
 	}
 
 	/**
 	 * @param end_time the end_time to set
 	 */
-	public void setEnd_time(String end_time) {
+	public void setEnd_time(Integer end_time) {
 		this.end_time = end_time;
 	}
 
-	/**
-	 * @return the interval
-	 */
-	public Integer getInterval() {
-		return interval;
-	}
-
-	/**
-	 * @param interval the interval to set
-	 */
-	public void setInterval(Integer interval) {
-		this.interval = interval;
-	}
-
-	/**
-	 * @return the job_time
-	 */
-	public String getJob_time() {
-		return job_time;
-	}
-
-	/**
-	 * @param job_time the job_time to set
-	 */
-	public void setJob_time(String job_time) {
-		this.job_time = job_time;
-	}
 
 	/**
 	 * @return the job_status
@@ -221,52 +161,15 @@ public class JobWatcherVO implements Serializable {
 		this.run_status = run_status;
 	}
 
-	/**
-	 * @return the next_run_time
-	 */
-	public String getNext_run_time() {
-		return next_run_time;
+
+
+	public Integer getThreadCount() {
+		return threadCount;
 	}
 
-	/**
-	 * @param next_run_time the next_run_time to set
-	 */
-	public void setNext_run_time(String next_run_time) {
-		this.next_run_time = next_run_time;
+	public void setThreadCount(Integer threadCount) {
+		this.threadCount = threadCount;
 	}
 
-	 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("JobWatcherVO [jobid=");
-		builder.append(jobid);
-		builder.append(", workflow_id=");
-		builder.append(workflow_id);
-		builder.append(", job_type=");
-		builder.append(job_type);
-		builder.append(", start_time=");
-		builder.append(start_time);
-		builder.append(", end_time=");
-		builder.append(end_time);
-		builder.append(", interval=");
-		builder.append(interval);
-		builder.append(", job_time=");
-		builder.append(job_time);
-		builder.append(", job_status=");
-		builder.append(job_status);
-		builder.append(", job_desc=");
-		builder.append(job_desc);
-		builder.append(", run_status=");
-		builder.append(run_status);
-		builder.append(", next_run_time=");
-		builder.append(next_run_time);
-		builder.append("]");
-		return builder.toString();
-	}
-	
-	
-	 
-	
 
 }

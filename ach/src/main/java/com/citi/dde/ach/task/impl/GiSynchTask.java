@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.citi.dde.ach.task.ITaskDef;
 import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.exception.TaskException;
+import com.citi.dde.common.util.DDEConstants;
 import com.citi.dde.common.util.Strategy;
 
 @Component("DATA_SYNC")
@@ -37,10 +38,20 @@ public class GiSynchTask extends ITaskRun implements ITaskDef<Integer>{
 	
 	@Override
 	public Integer process() {
-			setCurrentTheadName(Strategy.DATA_SYNC);
-			while(keepRunning()){
-				pause();
-			}
+			boolean failSafe = true;
+			try{
+				setCurrentTheadName(Strategy.DATA_SYNC);
+				while(keepRunning()){
+					pause();
+				}	
+			}catch(Exception e){
+				failSafe = false;
+			}finally {
+				if(!failSafe){
+					updateThreadStatus(getThreadName(),DDEConstants.DEACTIVE);
+				}
+			}	
+			
 	return 0;
 	}
 }
