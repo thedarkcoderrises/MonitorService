@@ -2,9 +2,11 @@ package com.citi.dde.ach.task;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 
 import com.citi.dde.ach.entity.JobWatcherVO;
 import com.citi.dde.ach.service.JobWatcherService;
@@ -24,15 +26,21 @@ public abstract class ITaskRun implements Runnable {
 	@Autowired
 	JobWatcherService jobWatcherService;
 	
+//	@Autowired
+//	ConcurrentTaskExecutor taskExecutor;
+
 	static volatile Integer timer =1;
 	
 	@Autowired
 	LoggingAspect log;
 	
 	public boolean keepRunning(){
-		System.out.println(getThreadName()+DDEConstants.IS_RUNNING);
-		log.info(getThreadName()+DDEConstants.IS_RUNNING);
-		return canSchedule(getThreadName());
+		String currentThread = getThreadName();
+		synchronized (currentThread) {
+			System.out.println(currentThread+DDEConstants.IS_RUNNING);
+			log.info(currentThread+DDEConstants.IS_RUNNING);
+			return canSchedule(currentThread);	
+		}
 	}
 	
 	private static volatile  Map<String,JobWatcherVO> jobDetailMap;
@@ -53,7 +61,7 @@ public abstract class ITaskRun implements Runnable {
 					}finally {
 						MasterTask.getActiveTaskMap().put(threadName, DDEConstants.ACTIVE);
 						System.out.println("1."+MasterTask.getActiveTaskMap());
-						log.info("1."+MasterTask.getActiveTaskMap().toString());
+//						log.info("1."+MasterTask.getActiveTaskMap().toString());
 					}
 				}
 			
@@ -92,11 +100,26 @@ public abstract class ITaskRun implements Runnable {
 	public void updateThreadStatus(String threadName,String status) {
 		synchronized (MasterTask.getActiveTaskMap()) { // Reschedule Task
 				MasterTask.getActiveTaskMap().put(threadName,status);
-				System.out.println("3."+MasterTask.getActiveTaskMap());
-				log.info("3."+MasterTask.getActiveTaskMap().toString());
 		}
 	}
 	
+	/*public void removeTaskFromPool() {
+		Thread t = Thread.currentThread();
+		synchronized (t) {
+			ThreadPoolExecutor tpe = (ThreadPoolExecutor) taskExecutor.getConcurrentExecutor();
+			try{
+				boolean flag =tpe.getQueue().remove(t);
+				if(flag){
+					System.out.println("removed from pool :"+getThreadName());
+				}else{
+					System.out.println("fail to remove from pool :"+getThreadName());
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+			}			
+		}
+	}*/
+
 	public void refreshJobDetailMap() {
 		try {
 			setJobDetailMap(jobWatcherService.getAllJobDetailMap());
@@ -111,11 +134,9 @@ public abstract class ITaskRun implements Runnable {
 		JobWatcherVO temp =jobDetailMap.get(strategy);
 		boolean flag = false;
 		try{
-			return flag = temp.getThreadCount()>0;
+			return flag = DDEConstants.ACTIVE.equalsIgnoreCase(temp.getJob_status());
 		}finally {
 			if(!flag){
-				log.info("4.NE as per JD of strategy :"+threadName);
-				System.out.println("4.NE as per JD of strategy :"+threadName);
 				updateThreadStatus(threadName,DDEConstants.NOT_ELIGIBLE);
 			}
 		}

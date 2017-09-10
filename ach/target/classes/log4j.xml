@@ -14,7 +14,7 @@
 		</layout>
 	</appender>
 	
-	<appender name="MasterTask" class="org.apache.log4j.RollingFileAppender">
+	<appender name="MASTER" class="org.apache.log4j.RollingFileAppender">
 		<param name="File"	value="C:\\logs\\ach\\MasterTask\\Master.log" />
 		<param name="MaxBackupIndex" value="20" />
 		<param name="MaxFileSize" value="10MB" />
@@ -77,9 +77,9 @@
 		</layout>
 	</appender>
 	
-	<logger name="MasterTask" additivity="false">
+	<logger name="MASTER" additivity="false">
 	  <level value="DEBUG"/> 
-	  <appender-ref ref="MasterTask" />
+	  <appender-ref ref="MASTER" />
 	</logger>
 	
 	<logger name="GiRecvTask" additivity="false">

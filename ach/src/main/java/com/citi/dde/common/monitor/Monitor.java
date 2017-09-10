@@ -59,9 +59,9 @@ public class Monitor implements IMonitorDef  {
 	public void execute() throws MonitorException {
 		boolean flag= true;
 		try{
-			int maxPoolSize = ITaskRun.getJobDetailMap().get(DDEConstants.MASTER).getThreadCount();
-			System.out.println("Max Thread Pool :"+maxPoolSize);
-			 ExecutorService executor = Executors.newFixedThreadPool(maxPoolSize);
+//			int maxPoolSize = ITaskRun.getJobDetailMap().get(DDEConstants.MASTER).getThreadCount();
+//			System.out.println("Max Thread Pool :"+maxPoolSize);
+			 ExecutorService executor = Executors.newCachedThreadPool();//newFixedThreadPool(maxPoolSize);
 			 taskExecutor.setConcurrentExecutor(executor);
 		}catch(Exception e){
 			flag = false;

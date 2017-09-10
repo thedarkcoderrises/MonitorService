@@ -45,4 +45,5 @@ public interface DDEConstants {
 	String APP = "app";
 	String COUNTRY = "country";
 	String NOT_ELIGIBLE = "NE";
+	String RE_SCHEDULE_DONE = "RSD";
 }
