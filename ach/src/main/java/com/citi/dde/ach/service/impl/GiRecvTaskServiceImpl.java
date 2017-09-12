@@ -5,22 +5,19 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.citi.dde.ach.service.GiRecvTaskService;
-import com.citi.dde.ach.task.ITaskRun;
-import com.citi.dde.common.aop.LoggingAspect;
 import com.citi.dde.common.exception.DdeExecutionException;
-import com.citi.dde.common.exception.TaskException;
+import com.citi.dde.common.util.DDEConstants;
 
 @Service
 public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 
 	static boolean firstThread = true;
 	
-	@Autowired
-	LoggingAspect log;
+	Logger log = Logger.getLogger(DDEConstants.GI_RECV_TASK);
 	
 	static List<String> temp= new ArrayList<String>();
 	List<String> files= new ArrayList<String>();
@@ -34,7 +31,7 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 		}
 	}
 	@Override
-	public Integer executeTask() throws Exception {
+	public Integer executeTask(String threadName) throws Exception {
 		/*synchronized (this) {
 				if(firstThread){
 					firstThread=false;
@@ -48,7 +45,7 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 					}
 				}	
 		}*/
-//		processCommand();
+//		processCommand(threadName);
 		return 0;
 	}
 
@@ -58,7 +55,7 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
 	private void businessLogic1() throws DdeExecutionException {
 		throw new DdeExecutionException("throwing Business Error");		
 	}
-	private void processCommand() {
+	private void processCommand(String threadName) {
         try {
         	for (final String fileEntry : files) {
         		boolean startReading = false;
@@ -69,9 +66,9 @@ public class GiRecvTaskServiceImpl implements GiRecvTaskService {
                 	}
         		}
                 	if(startReading){
-                		System.out.println(ITaskRun.getThreadName()+" Start. File Archiving  = "+fileEntry);
+                		System.out.println(threadName+" Start. File Archiving  = "+fileEntry);
                 		  Thread.sleep(2000);
-                		  System.out.println(ITaskRun.getThreadName()+" End. File Archiving  = "+fileEntry);
+                		  System.out.println(threadName+" End. File Archiving  = "+fileEntry);
                 	}
             }
           

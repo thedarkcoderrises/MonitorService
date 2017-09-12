@@ -6,11 +6,11 @@ public interface DDEConstants {
 	String MQ_BROKER_URL="activemq.broker.url";
 	String JMS = "jms";
 	String PATH_CTL_FILES="dde.ach.ctlFilePath";
-	/*String GI_SCRUB_PAUSE="GI_SCRUB.waittime";
+	String GI_SCRUB_PAUSE="GI_SCRUB.waittime";
 	String DATA_SYNC_PAUSE="DATA_SYNC.waittime";
 	String MSG_SEND_PAUSE ="MSG_SEND.waittime";
 	String MSG_RECV_PAUSE="MSG_RECV.waittime";
-	String NPCI_SVC_PAUSE="NPCI_SVC.waittime";*/
+	String NPCI_SVC_PAUSE="NPCI_SVC.waittime";
 	String MASTER_PAUSE="MASTER.waittime";
 	String DEFAULT_PAUSE = "default.waittime";
 	String WAIT_TIME=".waittime";
@@ -36,7 +36,7 @@ public interface DDEConstants {
 	String ACTIVE = "Y";
 	String DEACTIVE = "N";
 	String UNDERSCORE = "_";
-	String THREAD_DELIMETER = "-thread-";
+	String THREAD_DELIMETER = "-";
 	String THREAD_SIZE=".thread.size";
 	String IS_RUNNING = "...";
 	String RE_SCHEDULE = "RS";
@@ -46,4 +46,6 @@ public interface DDEConstants {
 	String COUNTRY = "country";
 	String NOT_ELIGIBLE = "NE";
 	String RE_SCHEDULE_DONE = "RSD";
+	int SYSTEM_EXIT=0;
+
 }

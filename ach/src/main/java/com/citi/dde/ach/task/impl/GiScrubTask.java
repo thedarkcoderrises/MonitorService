@@ -1,19 +1,14 @@
 package com.citi.dde.ach.task.impl;
 
+import org.jboss.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import com.citi.dde.ach.service.GiScrubTaskService;
 import com.citi.dde.ach.task.ITaskRun;
-import com.citi.dde.common.aop.LoggingAspect;
 import com.citi.dde.common.util.DDEConstants;
-import com.citi.dde.common.util.Strategy;
 
 
-@Component("GI_SCRUB")
-@Scope("prototype")
 public class GiScrubTask extends ITaskRun {
 
 	@Autowired
@@ -22,9 +17,7 @@ public class GiScrubTask extends ITaskRun {
 	@Autowired
 	GiScrubTaskService giScrubTaskService;
 	
-	@Autowired
-	LoggingAspect log;
-	
+	Logger log = Logger.getLogger(DDEConstants.GI_SCRUB_TASK);	
 	@Override
 	public void run() {
 			process();
@@ -32,20 +25,21 @@ public class GiScrubTask extends ITaskRun {
 
 	public Integer process() {
 		boolean failSafe = true;
+		String threadName = DDEConstants.EMPTY_STRING;
 		try{
-			setCurrentTheadName(Strategy.GI_SCRUB);
-			while(keepRunning()){
-				giScrubTaskService.executeTask();
-				pause();
+			threadName=	setCurrentTheadName(DDEConstants.GI_SCRUB_TASK);
+			while(keepRunning(threadName)){
+				giScrubTaskService.executeTask(threadName);
+				pause(DDEConstants.GI_SCRUB_PAUSE);
 			}	
 		}catch(Exception e){
 			failSafe = false;
-			log.interceptException(e);
+			log.error(e);
 		}finally {
 			if(!failSafe){
-				updateThreadStatus(getThreadName(),DDEConstants.DEACTIVE);
+				updateThreadStatus(threadName,DDEConstants.DEACTIVE);
 			}
-			System.out.println("Stop.."+ getThreadName());
+			System.out.println("Stop.."+threadName);
 		}
 		
 	return 0;

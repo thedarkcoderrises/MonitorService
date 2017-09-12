@@ -1,17 +1,13 @@
 package com.citi.dde.ach.task.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.util.DDEConstants;
 import com.citi.dde.common.util.Strategy;
 
 
-@Component("NPCI_SVC")
-@Scope("prototype")
 public class NPCIServcTask extends ITaskRun{
 
 	@Autowired
@@ -24,18 +20,19 @@ public class NPCIServcTask extends ITaskRun{
 
 	public Integer process() {
 			boolean failSafe = true;
+			String threadName = DDEConstants.EMPTY_STRING;
 			try{
-				setCurrentTheadName(Strategy.NPCI_SVC);
-				while(keepRunning()){
-					pause();
+				threadName =setCurrentTheadName(DDEConstants.NPCI_SVC_TASK);
+				while(keepRunning(threadName)){
+					pause(DDEConstants.NPCI_SVC_PAUSE);
 				}	
 			}catch(Exception e){
 				failSafe = false;
 			}finally {
 				if(!failSafe){
-					updateThreadStatus(getThreadName(),DDEConstants.DEACTIVE);
+					updateThreadStatus(threadName,DDEConstants.DEACTIVE);
 				}
-				System.out.println("Stop.."+ getThreadName());
+				System.out.println("Stop.."+ threadName);
 			}
 	return 0;
 	}

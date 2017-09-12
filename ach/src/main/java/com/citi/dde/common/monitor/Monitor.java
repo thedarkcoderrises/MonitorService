@@ -5,7 +5,6 @@ package com.citi.dde.common.monitor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.citi.dde.ach.entity.JobWatcherVO;
 import com.citi.dde.ach.task.ITaskRun;
+import com.citi.dde.ach.task.impl.MasterTask;
 import com.citi.dde.common.exception.MonitorException;
 import com.citi.dde.common.exception.PauseException;
 import com.citi.dde.common.util.DDEConstants;
@@ -36,7 +36,6 @@ public class Monitor implements IMonitorDef  {
 
 	private IMonitorConfig config;
 	
-	int SYSTEM_EXIT=0;
 
 	private static final Logger logger = LogManager.getLogger(Monitor.class);
 	
@@ -59,17 +58,35 @@ public class Monitor implements IMonitorDef  {
 	public void execute() throws MonitorException {
 		boolean flag= true;
 		try{
-//			int maxPoolSize = ITaskRun.getJobDetailMap().get(DDEConstants.MASTER).getThreadCount();
-//			System.out.println("Max Thread Pool :"+maxPoolSize);
-			 ExecutorService executor = Executors.newCachedThreadPool();//newFixedThreadPool(maxPoolSize);
+			int maxPoolSize = getCorePoolSize();
+			if(maxPoolSize <=0){
+				return;
+			}
+			 ExecutorService executor = Executors.newFixedThreadPool(maxPoolSize);
 			 taskExecutor.setConcurrentExecutor(executor);
 		}catch(Exception e){
 			flag = false;
 		}
 		if(flag)
 		for(Runnable task : allTasks) {
+			if(task instanceof MasterTask){
+				MasterTask mt = (MasterTask) task;
+				mt.setMasterThreadName(mt.setCurrentTheadName(DDEConstants.MASTER));
+			}
 			taskExecutor.submit(task);
 		}
+	}
+
+	private int getCorePoolSize() {
+		JobWatcherVO masterJob = ITaskRun.getJobDetailMap().get(DDEConstants.MASTER);
+		Integer cnt = masterJob.getThreadCount();
+		System.out.println("Max Thread Pool :"+cnt);
+		if((cnt == null || cnt <= 0) && !DDEConstants.ACTIVE.equalsIgnoreCase(masterJob.getJob_status())){
+			return 0;
+		}else{
+			return cnt;
+		}
+			
 	}
 
 	public void init() throws MonitorException {
@@ -78,7 +95,9 @@ public class Monitor implements IMonitorDef  {
 
 	public void stop() throws MonitorException {
 		logger.info("Stopping service...");
-		System.exit(SYSTEM_EXIT);
+		((ExecutorService)taskExecutor.getConcurrentExecutor()).shutdown();
+		System.out.println("Monitor shutdown...");
+		System.exit(DDEConstants.SYSTEM_EXIT);
 	}
 
 	public void run() {		

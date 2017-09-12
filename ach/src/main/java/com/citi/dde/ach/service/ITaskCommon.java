@@ -2,5 +2,5 @@ package com.citi.dde.ach.service;
 
 public interface ITaskCommon<T> {
 
-	public T executeTask() throws Exception;
+	public T executeTask(String threadName) throws Exception;
 }

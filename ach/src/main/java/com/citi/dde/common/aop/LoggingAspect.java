@@ -66,7 +66,7 @@ public class LoggingAspect {
 	}
 
 //	@AfterThrowing(pointcut = "execution(* com.citi.dde.ach.*.*.*(..))", throwing = "ex")
-	private void errorInterceptor(Exception ex) {
+/*	private void errorInterceptor(Exception ex) {
 		Logger taskLog;
 		if(ex instanceof CommonException){
 			String loggerName = ITaskRun.getThreadName();
@@ -95,7 +95,7 @@ public class LoggingAspect {
 	
 	public void error(String info){
 		log(info,getLogger(ITaskRun.getThreadName()),DDEConstants.ERROR);
-	}
+	}*/
 	
 	
 	private void log(String info, Logger logger, String logType) {
@@ -108,8 +108,8 @@ public class LoggingAspect {
 	}
 
 //	@AfterThrowing(pointcut = "execution(* com.citi.dde.ach.*.*.*(..))", throwing = "ex")
-	public void interceptException(Exception ex) {
-		/*if(ex instanceof DdeExecutionException){
+	/*public void interceptException(Exception ex) {
+		if(ex instanceof DdeExecutionException){
 			errorInterceptor((DdeExecutionException)ex);
 		}else if(ex instanceof TaskException){
 			errorInterceptor((TaskException)ex);
@@ -127,7 +127,7 @@ public class LoggingAspect {
 				}
 			}
 			errorInterceptor(ex);
-		}*/
+		}
 		errorInterceptor(ex);
 	}
 	
@@ -137,5 +137,5 @@ public class LoggingAspect {
 
 	private void raiseVT() {
 		info("VT Raised");
-	}
+	}*/
 }

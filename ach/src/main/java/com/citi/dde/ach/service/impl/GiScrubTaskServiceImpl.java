@@ -8,7 +8,7 @@ import com.citi.dde.ach.service.GiScrubTaskService;
 public class GiScrubTaskServiceImpl implements GiScrubTaskService {
 
 	@Override
-	public Integer executeTask() throws Exception {
+	public Integer executeTask(String threadName) throws Exception {
 			/*if(true){
 				Thread.sleep(4000);
 				throw new NullPointerException();

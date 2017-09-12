@@ -3,34 +3,34 @@ package com.citi.dde.ach.task.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
-import org.springframework.stereotype.Component;
 
 import com.citi.dde.ach.service.JobWatcherService;
 import com.citi.dde.ach.task.ITaskRun;
-import com.citi.dde.common.aop.LoggingAspect;
+import com.citi.dde.common.exception.MonitorException;
 import com.citi.dde.common.exception.TaskException;
 import com.citi.dde.common.util.DDEConstants;
 import com.citi.dde.common.util.Strategy;
 
 
-@Component("MASTER")
 public class MasterTask extends ITaskRun {
 
 	@Autowired
 	private ConcurrentTaskExecutor taskExecutor;
 	
-	@Autowired
-	LoggingAspect log;
-	
+	Logger log = Logger.getLogger(DDEConstants.MASTER_TASK);	
 	@Autowired
 	private ApplicationContext context;
+	
+	private String masterThreadName;
 	
 	@Autowired
 	JobWatcherService jobWatcherService;
@@ -44,45 +44,32 @@ public class MasterTask extends ITaskRun {
 		int allTask=0;
 		try{
 			List<Strategy> startergies = Strategy.MASTER.getSlaveStrategies();
-//			boolean notEligibleFlag= false;
-//			String stratergies = DDEConstants.EMPTY_STRING;
 			for (Strategy strategy : startergies) {
-				String strategyCode = strategy.getStrategy();
-				int threadCnt = getCount(strategyCode);
-				if((threadCnt>0) && canSchedule(strategyCode)){
+				String taskName = strategy.getStrategy();
+				int threadCnt = getCount(taskName);
+				if((threadCnt>0) && canSchedule(taskName)){
 					for(int i=0;i<threadCnt;i++){
 						Runnable task = context.getBean(strategy.name(), Runnable.class);
-							taskExecutor.execute(task);	
+							taskExecutor.submit(task);	
 						allTask++;
 					}
-				}else{
-//					notEligibleFlag=true;
-//					if(stratergies.isEmpty()){
-//						stratergies =strategyCode;
-//					}else{
-//						stratergies+=", "+strategyCode;
-//					}
 				}
 			}
-//			if(notEligibleFlag){
-//				System.out.println("Strategies {"+stratergies+"} are Not Eligible");
-//			}
 		}catch(Exception e){
 			log.error(e.getMessage());
 		}
 		return allTask;
 	}
 
-
-	private int getCount(String strategyCode) {
-		Integer toThreadCnt = getJobDetailMap().get(strategyCode).getThreadCount();
+	private int getCount(String taskName) {
+		Integer toThreadCnt = getJobDetailMap().get(taskName).getThreadCount();
 		if(toThreadCnt == null || toThreadCnt==0 ){
 			return 0;
 		}
 		int currentThreadCnt =0;
 		for (String thread : getActiveTaskMap().keySet()) {
 			String status = getActiveTaskMap().get(thread);
-			if(thread.contains(strategyCode) && DDEConstants.ACTIVE.equalsIgnoreCase(status)){
+			if(thread.contains(taskName) && DDEConstants.ACTIVE.equalsIgnoreCase(status)){
 				++currentThreadCnt;
 			}
 		}
@@ -91,47 +78,67 @@ public class MasterTask extends ITaskRun {
 
 	private void monitorAllThread() {
 		try{
-			while(true){
+			while(keepRunning(getMasterThreadName())){
 				try{
 					executeAllTaskAsThread();
-//					System.out.println("1."+MasterTask.getActiveTaskMap());
 				}finally {
 					System.out.println("Master Paused");
-					pause();
+					pause(DDEConstants.MASTER_PAUSE);
 					refreshJobDetailMap();
 					System.out.println("Refreshed...");
 				}
 			}	
 		}catch(Exception e){
-			log.interceptException(new TaskException(e.getMessage(),ITaskRun.getThreadName(),e));
+			//TODO
+		}finally {
+			ExecutorService es = ((ExecutorService)taskExecutor.getConcurrentExecutor());
+			es.shutdownNow();
+			es.shutdown();
+			if(es.isShutdown()){
+				System.out.println("Monitor shutdown...");
+				pause(DDEConstants.MASTER_PAUSE);
+				System.exit(DDEConstants.SYSTEM_EXIT);	
+			}
+			
 		}
 		
 	}
 
+	
 	@PostConstruct
 	public void init() throws TaskException {
-		this.activeTaskMap = new TreeMap<String,String>();
 		refreshJobDetailMap();
 	}
 
 
 	public Integer process() {
 		try{
-			setCurrentTheadName(Strategy.MASTER);
+			setCurrentTheadName(DDEConstants.MASTER_TASK);
 			monitorAllThread();
 		}catch(Exception e){
-			log.interceptException(e);
+			log.error(e,e);
 		}
 		 return 0;		 
 	}
 
 	public static Map<String, String> getActiveTaskMap() {
+		if(activeTaskMap == null){
+			activeTaskMap = new TreeMap<String,String>();
+		}
 		return activeTaskMap;
 	}
 
 	@Override
 	public void run() {
 			process();
+	}
+
+	public String getMasterThreadName() {
+		return masterThreadName;
+	}
+
+	public void setMasterThreadName(String masterThreadName) {
+		this.masterThreadName = masterThreadName;
 	}
 
 	

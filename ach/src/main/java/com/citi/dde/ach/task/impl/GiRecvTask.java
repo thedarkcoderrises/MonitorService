@@ -1,18 +1,13 @@
 package com.citi.dde.ach.task.impl;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import com.citi.dde.ach.service.GiRecvTaskService;
 import com.citi.dde.ach.task.ITaskRun;
-import com.citi.dde.common.aop.LoggingAspect;
 import com.citi.dde.common.util.DDEConstants;
-import com.citi.dde.common.util.Strategy;
 
-@Component("MSG_RECV")
-@Scope("prototype")
 public class GiRecvTask extends ITaskRun{
 
 	@Autowired
@@ -21,8 +16,7 @@ public class GiRecvTask extends ITaskRun{
 	@Autowired
 	GiRecvTaskService giRecvTaskService;
 	
-	@Autowired
-	LoggingAspect log;
+	Logger log = Logger.getLogger(DDEConstants.GI_RECV_TASK);
 	
 
 
@@ -33,21 +27,21 @@ public class GiRecvTask extends ITaskRun{
 
 	public Integer process(){
 		boolean isComplete = true;
+		String threadName = DDEConstants.EMPTY_STRING;
 		try{
-			setCurrentTheadName(Strategy.MSG_RECV);
-			while(keepRunning()){
-				giRecvTaskService.executeTask();
-				pause();
+			threadName=setCurrentTheadName(DDEConstants.GI_RECV_TASK);
+			while(keepRunning(threadName)){
+				giRecvTaskService.executeTask(threadName);
+				pause(DDEConstants.MSG_RECV_PAUSE);
 			}
 		}catch(Exception e){
 			isComplete = false;
-			log.interceptException(e);
+			log.error(e,e);
 		}finally {
 			if(!isComplete){
-				updateThreadStatus(getThreadName(),DDEConstants.DEACTIVE);
+				updateThreadStatus(threadName,DDEConstants.DEACTIVE);
 			}
-			System.out.println("Stop.."+ getThreadName());
-//			removeTaskFromPool();
+			System.out.println("Stop.."+ threadName);
 		}
 			
 	return 0;

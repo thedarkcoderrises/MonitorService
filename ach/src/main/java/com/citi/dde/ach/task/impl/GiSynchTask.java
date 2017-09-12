@@ -1,16 +1,11 @@
 package com.citi.dde.ach.task.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import com.citi.dde.ach.task.ITaskRun;
 import com.citi.dde.common.util.DDEConstants;
-import com.citi.dde.common.util.Strategy;
 
-@Component("DATA_SYNC")
-@Scope("prototype")
 public class GiSynchTask extends ITaskRun {
 
 	
@@ -24,18 +19,19 @@ public class GiSynchTask extends ITaskRun {
 
 	public Integer process() {
 			boolean failSafe = true;
+			String threadName = DDEConstants.EMPTY_STRING;
 			try{
-				setCurrentTheadName(Strategy.DATA_SYNC);
-				while(keepRunning()){
-					pause();
+				threadName =setCurrentTheadName(DDEConstants.GI_SYNCH_TASK);
+				while(keepRunning(threadName)){
+					pause(DDEConstants.DATA_SYNC_PAUSE);
 				}	
 			}catch(Exception e){
 				failSafe = false;
 			}finally {
 				if(!failSafe){
-					updateThreadStatus(getThreadName(),DDEConstants.DEACTIVE);
+					updateThreadStatus(threadName,DDEConstants.DEACTIVE);
 				}
-				System.out.println("Stop.."+ getThreadName());
+				System.out.println("Stop.."+ threadName);
 			}	
 			
 	return 0;

@@ -1,24 +1,20 @@
 package com.citi.dde.ach.task;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.Set;
 
+import org.jboss.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.util.StringUtils;
 
 import com.citi.dde.ach.entity.JobWatcherVO;
 import com.citi.dde.ach.service.JobWatcherService;
 import com.citi.dde.ach.task.impl.MasterTask;
-import com.citi.dde.common.aop.LoggingAspect;
 import com.citi.dde.common.exception.TaskException;
 import com.citi.dde.common.util.DDEConstants;
-import com.citi.dde.common.util.Strategy;
 
 public abstract class ITaskRun implements Runnable {
-	
-	private Strategy strategy;
 	
 	@Autowired
 	Environment env;
@@ -26,54 +22,41 @@ public abstract class ITaskRun implements Runnable {
 	@Autowired
 	JobWatcherService jobWatcherService;
 	
-//	@Autowired
-//	ConcurrentTaskExecutor taskExecutor;
-
 	static volatile Integer timer =1;
 	
-	@Autowired
-	LoggingAspect log;
+	Logger log = Logger.getLogger(DDEConstants.MASTER_TASK);
 	
-	public boolean keepRunning(){
-		String currentThread = getThreadName();
-		synchronized (currentThread) {
-			System.out.println(currentThread+DDEConstants.IS_RUNNING);
-			log.info(currentThread+DDEConstants.IS_RUNNING);
-			return canSchedule(currentThread);	
+	public boolean keepRunning(String threadName){
+		synchronized (Thread.currentThread()) {
+			System.out.println(threadName+DDEConstants.IS_RUNNING);
+			return canSchedule(threadName);	
 		}
 	}
 	
 	private static volatile  Map<String,JobWatcherVO> jobDetailMap;
 	
-	public void setCurrentTheadName(Strategy strategy){
-		try{
-			String threadName =ITaskRun.getThreadName();
+	public String setCurrentTheadName(String task){
+			String poolThreadName =Thread.currentThread().getName();
+			String threadName = null;
 			synchronized (MasterTask.getActiveTaskMap()) {
 					try{
-						this.strategy = strategy;
-						if(threadName.contains(strategy.getStrategy())){
-							return;
-						}else{
-							String threadNo = threadName.split(DDEConstants.THREAD_DELIMETER)[1];
-							threadName = strategy.getStrategy()+DDEConstants.UNDERSCORE+threadNo;
-							Thread.currentThread().setName(threadName);
-						}
+						String[] array = poolThreadName.split(DDEConstants.THREAD_DELIMETER);
+							String threadNo = array[array.length-1];
+							threadName = task+DDEConstants.UNDERSCORE+threadNo;
 					}finally {
-						MasterTask.getActiveTaskMap().put(threadName, DDEConstants.ACTIVE);
-						System.out.println("1."+MasterTask.getActiveTaskMap());
-//						log.info("1."+MasterTask.getActiveTaskMap().toString());
+						if(!StringUtils.isEmpty(threadName)){
+							updateThreadStatus(threadName, DDEConstants.ACTIVE);
+						}else{
+							// throw exception;
+						}
 					}
 				}
-			
-		}catch(Exception e){
-			log.error(e.getMessage());			
-		}
-		
+		return threadName;
 	}
 	
-	public void pause(){
+	public void pause(String task){
 		try {
-			Thread.sleep(Integer.parseInt(env.getProperty(this.strategy+DDEConstants.WAIT_TIME)));
+			Thread.sleep(Integer.parseInt(env.getProperty(task)));
 		} catch (InterruptedException | NumberFormatException e) {
 			log.error(e.getMessage());
 			try {
@@ -85,53 +68,27 @@ public abstract class ITaskRun implements Runnable {
 		++timer;
 	}
 
-	public void setStrategy(Strategy name) {
-		this.strategy = name;
-	}
-
-	public Strategy getStrategy() {
-		return strategy;
-	}
-	
-	public static String getThreadName() {
-		return Thread.currentThread().getName();
-	}
-	
 	public void updateThreadStatus(String threadName,String status) {
 		synchronized (MasterTask.getActiveTaskMap()) { // Reschedule Task
 				MasterTask.getActiveTaskMap().put(threadName,status);
+				System.out.println("1."+MasterTask.getActiveTaskMap());
 		}
 	}
 	
-	/*public void removeTaskFromPool() {
-		Thread t = Thread.currentThread();
-		synchronized (t) {
-			ThreadPoolExecutor tpe = (ThreadPoolExecutor) taskExecutor.getConcurrentExecutor();
-			try{
-				boolean flag =tpe.getQueue().remove(t);
-				if(flag){
-					System.out.println("removed from pool :"+getThreadName());
-				}else{
-					System.out.println("fail to remove from pool :"+getThreadName());
-				}
-			}catch(Exception e){
-				e.printStackTrace();
-			}			
-		}
-	}*/
-
 	public void refreshJobDetailMap() {
 		try {
 			setJobDetailMap(jobWatcherService.getAllJobDetailMap());
 		} catch (TaskException e) {
-			log.interceptException(e);
+			log.error(e,e);
 		}
 	}
 
-	public boolean canSchedule(String strategy){
-		String threadName= strategy;
-		strategy = strategy.split(DDEConstants.UNDERSCORE)[0];
-		JobWatcherVO temp =jobDetailMap.get(strategy);
+	
+	
+	
+	public boolean canSchedule(String threadName){
+		String taskName = threadName.split(DDEConstants.UNDERSCORE)[0];
+		JobWatcherVO temp =jobDetailMap.get(taskName);
 		boolean flag = false;
 		try{
 			return flag = DDEConstants.ACTIVE.equalsIgnoreCase(temp.getJob_status());
